@@ -1,6 +1,8 @@
-#include "sys/drivers/vga/vga.h"
-#include "sys/drivers/vga/colors.h"
+#include "arch/i386/display/vga/vga.h"
+#include "arch/i386/display/vga/colors.h"
+#include "arch/i386/err/exception.h"
 #include "util/ints.h"
+#include "util/strings.h"
 
 void sleep(uint32_t length) {
   for(;;) {
@@ -16,14 +18,13 @@ void kstart() {
     for(;;) {
         i++;
         PrintInfo print_info;
-        char data[255] = {'\0'};
-        itoa_32(i, data);
-        print_info.data = "Hello";
+        print_info.data = "Welcome";
         print_info.bg_color = BLACK;
         print_info.fg_color = GRAY + BRIGHT;
-        print_info.x = 1;
-        print_info.y = 25;
+        print_info.x = 0;
+        print_info.y = 0;
         kprint(print_info);
         sleep(0xFFFFFFF);
+        panic("Test panic");
     }    
 }

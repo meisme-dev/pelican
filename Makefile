@@ -9,7 +9,7 @@ OBJECTS := $(patsubst %.c, %.o, $(SRC))
 
 all:
 	mkdir -p build/boot/grub
-	$(AS) $(ASFLAGS) src/boot.S -o src/boot.o
+	$(AS) $(ASFLAGS) kernel/boot.S -o kernel/boot.o
 	$(MAKE) compile
 	$(MAKE) create
 
@@ -31,7 +31,7 @@ create:
 	cp grub.cfg build/boot/grub/grub.cfg
 	grub2-mkrescue -o build/boot/bkrnl.iso build
 
-%.o: src/%.c
+%.o: kernel/%.c
 	$(CC) $(CFLAGS) $< -o $@
 
 .PHONY: all compile clean run bin rebuild
