@@ -1,6 +1,6 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
-#include "../../vendor/limine/limine.h"
+#include "../../../vendor/limine/limine.h"
 
 typedef struct {
     uint8_t *ptr;

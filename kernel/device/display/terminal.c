@@ -1,9 +1,9 @@
 #include <stddef.h>
 #include "terminal.h"
-#include "../../libk/stdlib.h"
-#include "../../libk/string.h"
+#include "../../../libk/stdlib.h"
+#include "../../../libk/string.h"
 #define SSFN_CONSOLEBITMAP_TRUECOLOR
-#include "../../vendor/ssf/ssfn.h"
+#include "../../../vendor/ssf/ssfn.h"
 
 
 void kputs(char *src, Buffer dst, const char *c) {

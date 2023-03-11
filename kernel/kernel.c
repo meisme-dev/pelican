@@ -1,6 +1,6 @@
 #include "../libk/string.h"
-#include "display/framebuffer.h"
-#include "display/terminal.h"
+#include "device/display/framebuffer.h"
+#include "device/display/terminal.h"
 
 extern unsigned char _binary_assets_font_sfn_start;
 
