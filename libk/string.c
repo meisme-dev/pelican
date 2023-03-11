@@ -1,15 +1,15 @@
 #include "string.h"
 
-uint32_t strlen(const char *str) {
-    uint32_t len = 0;
+size_t strlen(const char *str) {
+    size_t len = 0;
     while(*str++ != '\0') {
         len++;
     }
     return len;
 }
 
-uint32_t strnlen(const char *str, size_t n) {
-    uint32_t len = 0;
+size_t strnlen(const char *str, size_t n) {
+    size_t len = 0;
     size_t num = n;
     while((*str++ != '\0') && num--) {
         len++;
