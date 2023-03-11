@@ -1,30 +1,21 @@
-#include "arch/i386/display/vga/vga.h"
-#include "arch/i386/display/vga/colors.h"
-#include "arch/i386/err/exception.h"
-#include "util/ints.h"
-#include "util/strings.h"
+#include "../libk/memory.h"
+#include "display/framebuffer.h"
+#include "display/terminal.h"
 
-void sleep(uint32_t length) {
-  for(;;) {
-    asm volatile("nop");
-    length--;
-    if(length <= 0)
-      break;
-    }
-}
+extern unsigned char _binary_assets_font_sfn_start;
 
 void kstart() {
-    uint8_t i = 0;
-    for(;;) {
-        i++;
-        PrintInfo print_info;
-        print_info.data = "Welcome";
-        print_info.bg_color = BLACK;
-        print_info.fg_color = GRAY + BRIGHT;
-        print_info.x = 0;
-        print_info.y = 0;
-        kprint(print_info);
-        sleep(0xFFFFFFF);
-        panic("Test panic");
-    }    
+    struct limine_framebuffer *framebuffer = create_fb();
+    memset((uint32_t *)framebuffer->address, 0x3b4252, framebuffer->width * framebuffer->height);
+    Buffer dst;
+    dst.ptr = (uint8_t *)framebuffer->address;
+    dst.bg = 0x3b4252;
+    dst.fg = 0xa3be8c;
+    dst.x = 16;
+    dst.y = 16;
+    dst.w = framebuffer->width;
+    dst.h = framebuffer->height;
+    dst.p = framebuffer->pitch;
+    kputs(&_binary_assets_font_sfn_start, dst, "Welcome to Pelican!");
+    for(;;);
 }

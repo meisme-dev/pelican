@@ -1,4 +1,3 @@
-#include "../arch/i386/err/exception.h"
 #include "strings.h"
 
 uint32_t strlen(const char *str) {

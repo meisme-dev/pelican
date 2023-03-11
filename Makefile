@@ -1,15 +1,16 @@
 CC = x86_64-elf-gcc
 AS = x86_64-elf-as
 LD = x86_64-elf-ld
-CFLAGS = -m32 -c -std=gnu99 -ffreestanding -O2 -Wall -Wextra -pedantic
-LDFLAGS = -m elf_i386 -T linker.ld
-ASFLAGS = --32
-SRC := $(shell find . -name "*.c")
+CFLAGS = -std=gnu11 -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pie -fno-pic -m64 -march=x86-64 -mabi=sysv -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -c
+LDFLAGS = -nostdlib -static -m elf_x86_64 -z max-page-size=0x1000 -T linker.ld
+ASFLAGS = --64
+SRC := $(shell find libk -name "*.c") $(shell find kernel -name "*.c")
 OBJECTS := $(patsubst %.c, %.o, $(SRC))
 
 all:
-	mkdir -p build/boot/grub
-	$(AS) $(ASFLAGS) kernel/boot.S -o kernel/boot.o
+	mkdir -p build
+	mkdir -p sysroot
+	$(MAKE) -C vendor/limine
 	$(MAKE) compile
 	$(MAKE) create
 
@@ -18,18 +19,25 @@ rebuild:
 	$(MAKE) all
 
 compile: $(OBJECTS)
+	$(LD) -r -b binary -o assets/font.o assets/font.sfn
 
 clean:
+	rm -rf sysroot
 	rm -rf build
 	find . -name "*.o" -exec rm {} +
 
 run:
-	qemu-system-x86_64 -cdrom build/boot/bkrnl.iso
+	qemu-system-x86_64 -cdrom sysroot/pelican.iso
 
 create:
-	$(LD) $(LDFLAGS) $(shell find . -name "*.o") -o build/boot/bkrnl.bin
-	cp grub.cfg build/boot/grub/grub.cfg
-	grub2-mkrescue -o build/boot/bkrnl.iso build
+	$(LD) $(LDFLAGS) $(shell find assets -name "*.o") $(shell find libk -name "*.o") $(shell find kernel -name "*.o") -o build/pelican.elf
+	cp build/pelican.elf limine.cfg vendor/limine/limine.sys vendor/limine/limine-cd.bin vendor/limine/limine-cd-efi.bin sysroot/
+	xorriso -as mkisofs -b limine-cd.bin \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        --efi-boot limine-cd-efi.bin \
+        -efi-boot-part --efi-boot-image --protective-msdos-label \
+        sysroot -o sysroot/pelican.iso
+	./vendor/limine/limine-deploy sysroot/pelican.iso
 
 %.o: kernel/%.c
 	$(CC) $(CFLAGS) $< -o $@
