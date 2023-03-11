@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stddef.h>
 uint32_t strlen(const char *str);
+uint32_t strnlen(const char *str, size_t n);
 char *strcat(char *dst, const char *src);
-void *memset(void *ptr, int value, size_t num);
+char *strncat(char *dst, const char *src, size_t n);
+char *strcpy(char *dst, const char *src);
+char *strncpy(char *dst, const char *src, size_t n);
+void *memset(void *ptr, int value, size_t n);
 #endif
