@@ -1,4 +1,4 @@
-#include "../libk/memory.h"
+#include "../libk/string.h"
 #include "display/framebuffer.h"
 #include "display/terminal.h"
 
@@ -16,6 +16,6 @@ void kstart() {
     dst.w = framebuffer->width;
     dst.h = framebuffer->height;
     dst.p = framebuffer->pitch;
-    kputs(&_binary_assets_font_sfn_start, dst, "Welcome to Pelican!");
+    kputs(&_binary_assets_font_sfn_start, dst, "abc");
     for(;;);
 }

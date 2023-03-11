@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include "terminal.h"
-#include "../../libk/ints.h"
-#include "../../libk/strings.h"
+#include "../../libk/stdlib.h"
+#include "../../libk/string.h"
 #define SSFN_CONSOLEBITMAP_TRUECOLOR
 #include "../../vendor/ssf/ssfn.h"
 
