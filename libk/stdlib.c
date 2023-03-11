@@ -16,7 +16,7 @@ void itoa(int64_t x, char *str) {
         x /= 10;
     }
 
-    while(r != 0) {
+    while(r != 0 && str[i] != '\0') {
         str[i] = (char)(r * mult % 10 + 48);
         r /= 10;
         i++;
