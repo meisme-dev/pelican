@@ -1,0 +1,7 @@
+[submodule "vendor/limine"]
+	path = vendor/limine
+	url = https://github.com/limine-bootloader/limine
+	branch = v4.x-branch-binary
+[submodule "vendor/ssf"]
+	path = vendor/ssf
+	url = https://gitlab.com/bztsrc/scalable-font2
