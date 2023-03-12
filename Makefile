@@ -1,7 +1,7 @@
 CC = x86_64-elf-gcc
 AS = x86_64-elf-as
 LD = x86_64-elf-ld
-CFLAGS = -std=gnu11 -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pie -fno-pic -m64 -march=x86-64 -mabi=sysv -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -c
+CFLAGS = -std=gnu11 -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pie -fno-pic -m64 -march=x86-64 -mabi=sysv -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -masm=att -c
 LDFLAGS = -nostdlib -static -m elf_x86_64 -z max-page-size=0x1000 -T linker.ld
 ASFLAGS = --64
 SRC := $(shell find libk -name "*.c") $(shell find kernel -name "*.c")
@@ -27,7 +27,7 @@ clean:
 	find . -name "*.o" -exec rm {} +
 
 run:
-	qemu-system-x86_64 -cdrom sysroot/pelican.iso
+	qemu-system-x86_64 -cdrom sysroot/pelican.iso -d int
 
 create:
 	$(LD) $(LDFLAGS) $(shell find assets -name "*.o") $(shell find libk -name "*.o") $(shell find kernel -name "*.o") -o build/pelican.elf
