@@ -47,7 +47,7 @@ const char *get_vendor(uint16_t vendor) {
     }
 }
 
-bool enumerate_devices(PciInfo *pci_infos) {
+uint16_t enumerate_devices(PciInfo *pci_infos) {
     uint16_t bus;
     uint8_t device;
     uint16_t i = 0;
@@ -62,8 +62,5 @@ bool enumerate_devices(PciInfo *pci_infos) {
             }
         }
     }
-    if(i == 0) {
-        return false;
-    }
-    return true;
+    return i;
 }
