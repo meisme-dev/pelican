@@ -1,7 +1,5 @@
 #include "pci.h"
-#include "../display/terminal.h"
 #include "../../../libk/sys/io.h"
-#include "vendors.h"
 #include <stddef.h>
 
 #define CONFIG_ADDRESS 0xCF8
@@ -25,26 +23,6 @@ bool device_exists(PciInfo pci_info) {
     uint32_t vendor = get_vendor_id(pci_info);
     if(vendor == 0xFFFFFFFF) return false;
     return true;
-}
-
-const char *get_vendor(uint16_t vendor) {
-    switch(vendor) {
-        case INTEL:
-        return "Intel Corporation";
-        break;
-        case AMD:
-        return "Advanced Micro Devices, Inc.";
-        break;
-        case NVIDIA:
-        return "NVIDIA Corporation";
-        break;
-        case VIRTIO:
-        return "VirtIO";
-        break;
-        case REALTEK:
-        return "Realtek Semiconductor Co., Ltd.";
-        break;
-    }
 }
 
 uint16_t enumerate_devices(PciInfo *pci_infos) {

@@ -39,6 +39,6 @@ typedef struct __attribute__((__packed__)){
     uint16_t flag;
 } GdtData;
 
-void *create_descriptors(GdtData *gdt_data, uint64_t* descriptors, size_t num);
+void create_descriptors(GdtData *gdt_data, uint64_t* descriptors, size_t num);
 
 #endif

@@ -19,7 +19,7 @@ size_t strnlen(const char *str, size_t n) {
 
 char *strcat(char *dst, const char *src) {
     char *tmp = dst + strlen(dst);
-    while (*tmp++ = *src++);
+    while ((*tmp++ = *src++));
     *tmp = '\0';
     return dst;
 }
@@ -34,7 +34,7 @@ char *strncat(char *dst, const char *src, size_t n) {
 
 char *strcpy(char *dst, const char *src) {
     char *tmp = dst;
-    while(*tmp++ = *src++);
+    while((*tmp++ = *src++));
     *tmp = '\0';
     return dst;
 }

@@ -9,19 +9,19 @@
 
 #define PADDING 16
 
-void set_terminal_font(char *src) {
+void set_terminal_font(unsigned char *src) {
     ssfn_src = (ssfn_font_t *)src;
 }
 
-void set_terminal_state(Buffer buffer) {
-    ssfn_dst.ptr = buffer.ptr;
-    ssfn_dst.bg = buffer.bg;
-    ssfn_dst.fg = buffer.fg;
-    ssfn_dst.x = buffer.x;
-    ssfn_dst.y = buffer.y;
-    ssfn_dst.w = buffer.w;
-    ssfn_dst.h = buffer.h;
-    ssfn_dst.p = buffer.p;
+void set_terminal_state(TerminalInfo terminal_info) {
+    ssfn_dst.ptr = terminal_info.ptr;
+    ssfn_dst.bg = terminal_info.bg;
+    ssfn_dst.fg = terminal_info.fg;
+    ssfn_dst.x = terminal_info.x;
+    ssfn_dst.y = terminal_info.y;
+    ssfn_dst.w = terminal_info.w;
+    ssfn_dst.h = terminal_info.h;
+    ssfn_dst.p = terminal_info.p;
 }
 
 static void newline() {
@@ -29,7 +29,7 @@ static void newline() {
     ssfn_dst.y += ssfn_dst.p / ssfn_dst.h + (PADDING / 2);
 }
 
-void kputchar(const char c) {
+static void kputchar(const char c) {
     if(c == '\n') {
         newline();
         return;
@@ -37,9 +37,38 @@ void kputchar(const char c) {
     ssfn_putc(c);
 }
 
-void kputs(const char *c) {
+static void kputs(const char *c) {
     while(*c != '\0') {
         kputchar(*c);
         c++;
     }
+}
+
+void puts(char *str) {
+    kputs(str);
+    kputchar('\n');
+}
+
+void printf(char *format, ...) {
+    va_list ap;
+    va_start(ap, format);
+    char *ptr = format;
+    while(*ptr) {
+        if(*ptr == '%') {
+            char str[16];
+            ptr++;
+            switch(*ptr++) {
+                case 's':
+                    kputs(va_arg(ap, char *));
+                    break;
+                case 'd':
+                    itoa(va_arg(ap, size_t), str);
+                    kputs(str);
+                    break;
+            }
+        } else {
+            kputchar(*ptr++);
+        }
+    }
+    va_end(ap);
 }

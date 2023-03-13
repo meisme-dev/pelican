@@ -13,6 +13,5 @@ typedef struct {
 uint32_t pci_read(PciInfo pci_info, uint8_t offset);
 uint16_t enumerate_devices(PciInfo *pci_infos);
 uint16_t get_vendor_id(PciInfo pci_info);
-const char *get_vendor(uint16_t vendor);
 
 #endif

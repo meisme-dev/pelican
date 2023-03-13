@@ -1,6 +1,7 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
 #include "../../../vendor/limine/limine.h"
+#define putchar(x) kputchar(x)
 
 typedef struct {
     uint8_t *ptr;
@@ -11,10 +12,10 @@ typedef struct {
     uint32_t w;
     uint32_t h;
     uint32_t p;
-} Buffer;
+} TerminalInfo;
 
-void set_terminal_font(char *src);
-void set_terminal_state(Buffer buffer);
-void kputchar(const char c);
-void kputs(const char *c);
+void set_terminal_font(unsigned char *src);
+void set_terminal_state(TerminalInfo buffer);
+void printf(char *format, ...);
+void puts(char *str);
 #endif

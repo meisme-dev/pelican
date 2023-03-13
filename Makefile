@@ -1,7 +1,26 @@
 CC = gcc
 AS = as
 LD = ld
-CFLAGS = -std=gnu11 -ffreestanding -fno-stack-protector -fno-stack-check -fno-lto -fno-pie -fno-pic -m64 -march=x86-64 -mabi=sysv -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -masm=att -c
+CFLAGS = -std=gnu11 \
+ 		 -ffreestanding \
+		 -fno-stack-protector \
+		 -fno-stack-check \
+		 -fno-lto -fno-pie \
+		 -fno-pic \
+		 -m64 \
+		 -march=x86-64 \
+		 -mabi=sysv \
+		 -mno-80387 \
+		 -mno-mmx \
+		 -mno-sse \
+		 -mno-sse2 \
+		 -mno-red-zone \
+		 -mcmodel=kernel \
+		 -masm=att \
+		 -Wall \
+		 -pedantic \
+		 -c 
+
 LDFLAGS = -nostdlib -static -m elf_x86_64 -z max-page-size=0x1000 -T linker.ld
 ASFLAGS = --64
 SRC := $(shell find libk -name "*.c") $(shell find kernel -name "*.c")
