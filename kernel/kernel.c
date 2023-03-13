@@ -1,5 +1,6 @@
 #include "../libk/string.h"
 #include "../libk/stdlib.h"
+#include "../libk/stdio.h"
 #include "device/display/framebuffer.h"
 #include "device/display/terminal.h"
 #include "device/pci/pci.h"
@@ -20,6 +21,8 @@ void kstart() {
     dst.w = framebuffer->width;
     dst.h = framebuffer->height;
     dst.p = framebuffer->pitch;
-    kputs(&_binary_assets_font_sfn_start, dst, "Hello");
+    set_terminal_state(dst);
+    set_terminal_font(&_binary_assets_font_sfn_start);
+    printf("Welcome to Pelican r%d", 202303121);
     for(;;);
 } 

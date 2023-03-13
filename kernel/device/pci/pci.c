@@ -1,5 +1,6 @@
 #include "pci.h"
 #include "../display/terminal.h"
+#include "../../../libk/sys/io.h"
 #include "vendors.h"
 #include <stddef.h>
 
@@ -23,7 +24,6 @@ uint16_t get_vendor_id(PciInfo pci_info) {
 bool device_exists(PciInfo pci_info) {
     uint32_t vendor = get_vendor_id(pci_info);
     if(vendor == 0xFFFFFFFF) return false;
-    if(vendor == NULL) return false;
     return true;
 }
 

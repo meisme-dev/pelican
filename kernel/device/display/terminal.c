@@ -5,19 +5,44 @@
 #define SSFN_CONSOLEBITMAP_TRUECOLOR
 #include "../../../vendor/ssf/ssfn.h"
 
+#include <stdarg.h>
 
-void kputs(char *src, Buffer dst, const char *c) {
+#define PADDING 16
+
+void set_terminal_font(char *src) {
     ssfn_src = (ssfn_font_t *)src;
-    ssfn_dst.ptr = dst.ptr;
-    ssfn_dst.bg = dst.bg;
-    ssfn_dst.fg = dst.fg;
-    ssfn_dst.x = dst.x;
-    ssfn_dst.y = dst.y;
-    ssfn_dst.w = dst.w;
-    ssfn_dst.h = dst.h;
-    ssfn_dst.p = dst.p;
+}
+
+void set_terminal_state(Buffer buffer) {
+    ssfn_dst.ptr = buffer.ptr;
+    ssfn_dst.bg = buffer.bg;
+    ssfn_dst.fg = buffer.fg;
+    ssfn_dst.x = buffer.x;
+    ssfn_dst.y = buffer.y;
+    ssfn_dst.w = buffer.w;
+    ssfn_dst.h = buffer.h;
+    ssfn_dst.p = buffer.p;
+}
+
+static void newline() {
+    ssfn_dst.x = PADDING;
+    ssfn_dst.y += ssfn_dst.p / ssfn_dst.h + (PADDING / 2);
+}
+
+void kputchar(const char c) {
+    ssfn_putc(c);
+}
+
+void kputs(const char *c) {
     while(*c != '\0') {
-        ssfn_putc(*c);
+        switch(*c) {
+            case '\n':
+                newline();
+                break;
+            default:
+                kputchar(*c);
+                break;
+        }
         c++;
     }
 }

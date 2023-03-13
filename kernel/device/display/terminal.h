@@ -13,5 +13,8 @@ typedef struct {
     uint32_t p;
 } Buffer;
 
-void kputs(char *src, Buffer dst, const char *c);
+void set_terminal_font(char *src);
+void set_terminal_state(Buffer buffer);
+void kputchar(const char c);
+void kputs(const char *c);
 #endif
