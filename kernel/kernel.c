@@ -23,6 +23,6 @@ void kstart() {
     dst.p = framebuffer->pitch;
     set_terminal_state(dst);
     set_terminal_font(&_binary_assets_font_sfn_start);
-    printf("Welcome to Pelican r%d", 202303121);
+    printf("Welcome to Pel\nican r%d", 202303131);
     for(;;);
 } 

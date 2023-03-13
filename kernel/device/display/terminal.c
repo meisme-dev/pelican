@@ -30,19 +30,16 @@ static void newline() {
 }
 
 void kputchar(const char c) {
+    if(c == '\n') {
+        newline();
+        return;
+    }
     ssfn_putc(c);
 }
 
 void kputs(const char *c) {
     while(*c != '\0') {
-        switch(*c) {
-            case '\n':
-                newline();
-                break;
-            default:
-                kputchar(*c);
-                break;
-        }
+        kputchar(*c);
         c++;
     }
 }

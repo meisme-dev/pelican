@@ -3,6 +3,13 @@
 #include "stdlib.h"
 #include "../kernel/device/display/terminal.h"
 
+#define putchar(x) kputchar(x)
+
+void puts(char *str) {
+    kputs(str);
+    putchar('\n');
+}
+
 void printf(char *format, ...) {
     va_list ap;
     va_start(ap, format);
