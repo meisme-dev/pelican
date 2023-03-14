@@ -7,7 +7,7 @@
 
 #include <stdarg.h>
 
-#define PADDING 16
+#define PADDING 32
 
 void set_terminal_font(unsigned char *src) {
     ssfn_src = (ssfn_font_t *)src;
@@ -55,14 +55,19 @@ void printf(char *format, ...) {
     char *ptr = format;
     while(*ptr) {
         if(*ptr == '%') {
-            char str[16];
+            char str[256] = {' '};
             ptr++;
             switch(*ptr++) {
                 case 's':
                     kputs(va_arg(ap, char *));
                     break;
                 case 'd':
-                    itoa(va_arg(ap, size_t), str);
+                    itoa(va_arg(ap, int64_t), str);
+                    kputs(str);
+                    break;
+
+                case 'u':
+                    itoa(va_arg(ap, uint64_t), str);
                     kputs(str);
                     break;
             }

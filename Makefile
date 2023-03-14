@@ -5,7 +5,8 @@ CFLAGS = -std=gnu11 \
  		 -ffreestanding \
 		 -fno-stack-protector \
 		 -fno-stack-check \
-		 -fno-lto -fno-pie \
+		 -fno-lto \
+		 -fno-pie \
 		 -fno-pic \
 		 -m64 \
 		 -march=x86-64 \
@@ -18,6 +19,7 @@ CFLAGS = -std=gnu11 \
 		 -mcmodel=kernel \
 		 -masm=att \
 		 -Wall \
+		 -Wextra \
 		 -pedantic \
 		 -c 
 

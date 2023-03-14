@@ -3,6 +3,7 @@
 #include "device/display/framebuffer.h"
 #include "device/display/terminal.h"
 #include "device/pci/pci.h"
+#include "memory/pmm.h"
 
 extern unsigned char _binary_assets_font_sfn_start;
 
@@ -13,13 +14,13 @@ void kstart() {
     terminal_info.ptr = (uint8_t *)framebuffer->address;
     terminal_info.bg = 0x3b4252;
     terminal_info.fg = 0xa3be8c;
-    terminal_info.x = 16;
-    terminal_info.y = 16;
+    terminal_info.x = 32;
+    terminal_info.y = 32;
     terminal_info.w = framebuffer->width;
     terminal_info.h = framebuffer->height;
     terminal_info.p = framebuffer->pitch;
     set_terminal_state(terminal_info);
     set_terminal_font(&_binary_assets_font_sfn_start);
-    printf("Welcome to Pelican r%d", 202303131);
+    init_pmm();
     for(;;);
 } 
