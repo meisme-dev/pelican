@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #include "../../libk/sys/list.h"
 
@@ -10,9 +11,9 @@
 
 typedef struct {
     Node node;
-    bool is_free;
     uint64_t index;
-} Block;
+    size_t size;
+} Block __attribute__((aligned(BLOCK_SIZE)));
 
 void init_pmm();
 

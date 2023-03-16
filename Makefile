@@ -48,7 +48,7 @@ clean:
 	find . -name "*.o" -exec rm {} +
 
 run:
-	qemu-system-x86_64 -cdrom sysroot/pelican.iso -d int
+	qemu-system-x86_64 -cdrom sysroot/pelican.iso -m 16G
 
 create:
 	$(LD) $(LDFLAGS) $(shell find assets -name "*.o") $(shell find libk -name "*.o") $(shell find kernel -name "*.o") -o build/pelican.elf

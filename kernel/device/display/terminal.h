@@ -13,7 +13,6 @@ typedef struct {
     uint32_t h;
     uint32_t p;
 } TerminalInfo;
-
 void set_terminal_font(unsigned char *src);
 void set_terminal_state(TerminalInfo buffer);
 void printf(char *format, ...);

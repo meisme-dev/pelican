@@ -56,6 +56,7 @@ void printf(char *format, ...) {
     while(*ptr) {
         if(*ptr == '%') {
             char str[256] = {' '};
+            uint64_t x = 0;
             ptr++;
             switch(*ptr++) {
                 case 's':
@@ -70,6 +71,24 @@ void printf(char *format, ...) {
                     itoa(va_arg(ap, uint64_t), str);
                     kputs(str);
                     break;
+
+                case 'b':
+                    x = va_arg(ap, uint64_t);
+                    char *suffix = "b\0";
+                    if(x >= (1024 * 1024 * 1024)) {
+                        suffix = "gb";
+                        itoa(x / (1024 * 1024 * 1024), str);
+                    } else if(x >= (1024 * 1024)) {
+                        suffix = "mb";
+                        itoa(x / (1024 * 1024), str);
+                    } else if(x >= 1024) {
+                        suffix = "kb";
+                        itoa(x / 1024, str);
+                    } else {
+                        itoa(x, str);
+                    }
+                    kputs(str);
+                    kputs(suffix);
             }
         } else {
             kputchar(*ptr++);
