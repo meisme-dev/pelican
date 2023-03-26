@@ -1,9 +1,9 @@
 #include <stddef.h>
 
-#include "pmm.h"
-#include "../../vendor/limine/limine.h"
-#include "../device/display/terminal.h"
-#include "../../libk/log.h"
+#include <memory/pmm.h>
+#include <limine/limine.h>
+#include <device/display/terminal.h>
+#include <stdint.h>
 
 static volatile struct limine_memmap_request request = {
     .id = LIMINE_MEMMAP_REQUEST,
@@ -13,7 +13,7 @@ static volatile struct limine_memmap_request request = {
 static Block *head = 0x0;
 static uint64_t *start_addr = 0x0;
 
-void init_pmm() {
+void init_pmm(void) {
     if(request.response->entries == NULL || request.response->entry_count == 0) {
         return;
     }
@@ -22,6 +22,7 @@ void init_pmm() {
     for(uint64_t i = 0; i < request.response->entry_count; i++) {
         total_mem += request.response->entries[i]->length;
     }
+
     for(uint64_t i = 0; i < request.response->entry_count; i++) {
         switch(request.response->entries[i]->type) {
         case LIMINE_MEMMAP_USABLE:
@@ -38,12 +39,21 @@ void init_pmm() {
         }
     }
     printf("Total memory: %b\n", (total_mem));
+    printf("Total blocks: %d\n", (total_mem / BLOCK_SIZE));
     printf("Start offset: %b\n", start_addr);
     head = (Block *)start_addr;
+    head->index = 0;
+    for(uint64_t i = 0; i < total_mem / BLOCK_SIZE; i++) {
+
+    }
 }
 
-Block *find_free_block() {
-    return (Block *)head->node.next;
+Block *find_free_block(void) {
+    uint64_t i = (uint64_t)head;
+    while((head + i)->node.next != NULL) {
+        i += sizeof(Block);
+    }
+    return (head + i)->node.next;
 }
 
 void kfree(void *addr) {

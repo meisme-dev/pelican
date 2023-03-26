@@ -1,8 +1,8 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
-#include "../../../vendor/limine/limine.h"
+#include <limine/limine.h>
 #define putchar(x) kputchar(x)
-
+#include <stddef.h>
 typedef struct {
     uint8_t *ptr;
     uint32_t bg;
@@ -17,4 +17,6 @@ void set_terminal_font(unsigned char *src);
 void set_terminal_state(TerminalInfo buffer);
 void printf(char *format, ...);
 void puts(char *str);
+void _trace(const char *file, size_t line);
+#define trace() _trace(__FILE__, __LINE__)
 #endif

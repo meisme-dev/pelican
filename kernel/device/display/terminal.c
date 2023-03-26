@@ -1,9 +1,9 @@
 #include <stddef.h>
-#include "terminal.h"
-#include "../../../libk/stdlib.h"
-#include "../../../libk/string.h"
+#include <device/display/terminal.h>
+#include <stdlib.h>
+#include <string.h>
 #define SSFN_CONSOLEBITMAP_TRUECOLOR
-#include "../../../vendor/ssf/ssfn.h"
+#include <ssf/ssfn.h>
 
 #include <stdarg.h>
 
@@ -24,7 +24,7 @@ void set_terminal_state(TerminalInfo terminal_info) {
     ssfn_dst.p = terminal_info.p;
 }
 
-static void newline() {
+static void newline(void) {
     ssfn_dst.x = PADDING;
     ssfn_dst.y += ssfn_dst.p / ssfn_dst.h + (PADDING / 2);
 }
@@ -95,4 +95,8 @@ void printf(char *format, ...) {
         }
     }
     va_end(ap);
+}
+
+void _trace(const char *file, size_t line) {
+    printf("At %s:%d:\n", file, line);
 }

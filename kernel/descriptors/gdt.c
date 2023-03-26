@@ -1,4 +1,4 @@
-#include "gdt.h"
+#include <descriptors/gdt.h>
 
 void create_descriptors(GdtData *gdt_data, uint64_t* descriptors, size_t num) {
     for(size_t i = 0; i < num; i++) {
@@ -13,5 +13,5 @@ void create_descriptors(GdtData *gdt_data, uint64_t* descriptors, size_t num) {
 }
 
 void load_descriptor(Gdtr gdtr) {
-    asm volatile("lgdt %0" :: "m"(gdtr) : "memory");
+    __asm__ volatile("lgdt %0" :: "m"(gdtr) : "memory");
 }

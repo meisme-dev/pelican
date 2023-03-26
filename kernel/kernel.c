@@ -1,13 +1,13 @@
-#include "../libk/string.h"
-#include "../libk/stdlib.h"
-#include "device/display/framebuffer.h"
-#include "device/display/terminal.h"
-#include "device/pci/pci.h"
-#include "memory/pmm.h"
+#include <string.h>
+#include <stdlib.h>
+#include <device/display/framebuffer.h>
+#include <device/display/terminal.h>
+#include <device/pci/pci.h>
+#include <memory/pmm.h>
 
-extern unsigned char _binary_assets_font_sfn_start;
+extern unsigned char _binary_font_sfn_start;
 
-void kstart() {
+void kstart(void) {
     struct limine_framebuffer *framebuffer = create_fb();
     memset((uint32_t *)framebuffer->address, 0x212121, framebuffer->width * framebuffer->height);
     TerminalInfo terminal_info;
@@ -20,7 +20,7 @@ void kstart() {
     terminal_info.h = framebuffer->height;
     terminal_info.p = framebuffer->pitch;
     set_terminal_state(terminal_info);
-    set_terminal_font(&_binary_assets_font_sfn_start);
+    set_terminal_font(&_binary_font_sfn_start);
     init_pmm();
     for(;;);
-} 
+}

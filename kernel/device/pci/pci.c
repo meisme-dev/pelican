@@ -1,5 +1,5 @@
-#include "pci.h"
-#include "../../../libk/sys/io.h"
+#include <device/pci/pci.h>
+#include <sys/io.h>
 #include <stddef.h>
 
 #define CONFIG_ADDRESS 0xCF8
