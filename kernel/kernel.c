@@ -22,5 +22,6 @@ void kstart(void) {
     set_terminal_state(terminal_info);
     set_terminal_font(&_binary_font_sfn_start);
     init_pmm();
+    puts("hi");
     for(;;);
 }

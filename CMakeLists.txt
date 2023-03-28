@@ -52,12 +52,13 @@ add_executable(pelican ${PROJECT_SOURCE_DIR}/kernel/kernel.c)
 
 target_link_options(
 		pelican PRIVATE
-        LINKER:-static
-        LINKER:-m
+	  LINKER:-no-pie
+    LINKER:-static
+    LINKER:-m
 		LINKER:elf_x86_64
-        LINKER:-z
+    LINKER:-z
 		LINKER:max-page-size=0x1000
-        LINKER:-T
+    LINKER:-T
 		LINKER:${PROJECT_SOURCE_DIR}/linker.ld
 )
 

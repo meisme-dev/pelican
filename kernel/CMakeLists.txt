@@ -12,7 +12,7 @@ add_compile_options(
         -fno-stack-protector 
         -fno-stack-check 
         -fno-lto 
-        -fno-pie 
+        -fno-pie	
         -fno-pic 
         -m64 
         -march=x86-64 
