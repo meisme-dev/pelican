@@ -9,10 +9,16 @@
 
 #define BLOCK_SIZE 4096
 
+enum block_type {
+    RESERVED,
+    FREE,
+    USED,
+};
+
 typedef struct {
     Node node;
     uint64_t index;
-    bool isFree;
+    enum block_type type;
 } Block __attribute__((aligned(BLOCK_SIZE)));
 
 void init_pmm(void);

@@ -17,6 +17,12 @@ static uint64_t *start_addr = 0x0;
 static uint64_t index = 1;
 
 uint64_t alloc_block(void);
+bool free_block(uint64_t i);
+
+#define set_block_type(x)                                                      \
+  head[index - BLOCK_SIZE].node.next = &head[index];                           \
+  head[index].node.prev = &head[index - BLOCK_SIZE];                           \
+  head[index].type = x;
 
 void init_pmm(void) {
   if (request.response->entries == NULL || request.response->entry_count == 0) {
@@ -58,9 +64,7 @@ void init_pmm(void) {
         for (uint64_t j = 0; j < request.response->entries[i]->length;
              j += BLOCK_SIZE) {
           index++;
-          head[index - BLOCK_SIZE].node.next = &head[index];
-          head[index].node.prev = &head[index - BLOCK_SIZE];
-          head[index].isFree = false;
+          set_block_type(RESERVED);
         }
         break;
       }
@@ -70,9 +74,7 @@ void init_pmm(void) {
       for (uint64_t j = 0; j < request.response->entries[i]->length;
            j += BLOCK_SIZE) {
         index++;
-        head[index - BLOCK_SIZE].node.next = &head[index];
-        head[index].node.prev = &head[index - BLOCK_SIZE];
-        head[index].isFree = true;
+        set_block_type(FREE);
       }
       break;
 
@@ -80,9 +82,7 @@ void init_pmm(void) {
       for (uint64_t j = 0; j < request.response->entries[i]->length;
            j += BLOCK_SIZE) {
         index++;
-        head[index - BLOCK_SIZE].node.next = &head[index];
-        head[index].node.prev = &head[index - BLOCK_SIZE];
-        head[index].isFree = false;
+        set_block_type(RESERVED);
       }
       break;
     }
@@ -91,19 +91,19 @@ void init_pmm(void) {
   printf("There are %d blocks\n", index);
 
   for (uint64_t i = 0; i < index; i++) {
-    char str[3] = "";
-    head[i].isFree ? strcpy(str, "#") : strcpy(str, ".");
-    for (uint8_t i = 0; i < 3; i++) {
-      put_serial(COM1, str[i]);
-    }
+    head[i].type == FREE ? put_serial(COM1, '#') : put_serial(COM1, '.');
   }
-  alloc_block();
+
+  uint64_t block = alloc_block();
+  if (free_block(block)) {
+    puts("Freed block");
+  };
 }
 
 uint64_t alloc_block(void) {
-  for(uint64_t i = 0; i < index; i++) {
-    if(head[i].isFree) {
-      head[i].isFree = false;
+  for (uint64_t i = 0; i < index; i++) {
+    if (head[i].type == FREE) {
+      head[i].type = USED;
       return i;
     }
   }
@@ -111,9 +111,9 @@ uint64_t alloc_block(void) {
 }
 
 bool free_block(uint64_t i) {
-  if(i > index || head[i].isFree) {
+  if (i > index || head[i].type == RESERVED) {
     return false;
   }
-  head[i].isFree = true;
+  head[i].type = FREE;
   return true;
 }
