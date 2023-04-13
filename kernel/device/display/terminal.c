@@ -1,3 +1,4 @@
+#include <device/display/framebuffer.h>
 #include <stddef.h>
 #include <device/display/terminal.h>
 #include <stdlib.h>
@@ -9,19 +10,27 @@
 
 #define PADDING 32
 
-void set_terminal_font(unsigned char *src) {
-    ssfn_src = (ssfn_font_t *)src;
-}
+extern unsigned char _binary_font_sfn_start;
+bool term_failed = true;
 
-void set_terminal_state(TerminalInfo terminal_info) {
-    ssfn_dst.ptr = terminal_info.ptr;
-    ssfn_dst.bg = terminal_info.bg;
-    ssfn_dst.fg = terminal_info.fg;
-    ssfn_dst.x = terminal_info.x;
-    ssfn_dst.y = terminal_info.y;
-    ssfn_dst.w = terminal_info.w;
-    ssfn_dst.h = terminal_info.h;
-    ssfn_dst.p = terminal_info.p;
+
+bool init_terminal(void) {
+    struct limine_framebuffer *framebuffer = create_fb();
+    if(framebuffer == NULL) {
+        return false;
+    }
+    ssfn_dst.ptr = (uint8_t *)framebuffer->address;
+    ssfn_dst.bg = 0x000000;
+    ssfn_dst.fg = 0xffffff;
+    ssfn_dst.x = PADDING;
+    ssfn_dst.y = PADDING;
+    ssfn_dst.w = framebuffer->width;
+    ssfn_dst.h = framebuffer->height;
+    ssfn_dst.p = framebuffer->pitch;
+    ssfn_src = (ssfn_font_t *)&_binary_font_sfn_start;
+    term_failed = false;
+    trace();
+    return true;
 }
 
 static void newline(void) {
@@ -29,7 +38,10 @@ static void newline(void) {
     ssfn_dst.y += ssfn_dst.p / ssfn_dst.h + (PADDING / 2);
 }
 
-static void kputchar(const char c) {
+void kputchar(const char c) {
+    if(term_failed) {
+        return;
+    }
     if(c == '\n') {
         newline();
         return;
@@ -56,12 +68,12 @@ void printf(char *format, ...) {
     while(*ptr) {
         if(*ptr == '%') {
             char str[256] = {' '};
-            uint64_t x = 0;
             ptr++;
             switch(*ptr++) {
                 case 's':
                     kputs(va_arg(ap, char *));
                     break;
+
                 case 'd':
                     itoa(va_arg(ap, int64_t), str);
                     kputs(str);
@@ -71,24 +83,6 @@ void printf(char *format, ...) {
                     itoa(va_arg(ap, uint64_t), str);
                     kputs(str);
                     break;
-
-                case 'b':
-                    x = va_arg(ap, uint64_t);
-                    char *suffix = "b\0";
-                    if(x >= (1024 * 1024 * 1024)) {
-                        suffix = "gb";
-                        itoa(x / (1024 * 1024 * 1024), str);
-                    } else if(x >= (1024 * 1024)) {
-                        suffix = "mb";
-                        itoa(x / (1024 * 1024), str);
-                    } else if(x >= 1024) {
-                        suffix = "kb";
-                        itoa(x / 1024, str);
-                    } else {
-                        itoa(x, str);
-                    }
-                    kputs(str);
-                    kputs(suffix);
             }
         } else {
             kputchar(*ptr++);

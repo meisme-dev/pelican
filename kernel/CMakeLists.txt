@@ -33,6 +33,7 @@ set(kernel_src
         "descriptors/gdt.c"
         "device/display/framebuffer.c"
         "device/display/terminal.c"
+        "device/serial/serial.c"
         "device/pci/pci.c"
         "memory/pmm.c"
 )

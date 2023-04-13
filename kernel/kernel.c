@@ -1,27 +1,26 @@
-#include <string.h>
-#include <stdlib.h>
 #include <device/display/framebuffer.h>
 #include <device/display/terminal.h>
 #include <device/pci/pci.h>
+#include <device/serial/serial.h>
 #include <memory/pmm.h>
-
-extern unsigned char _binary_font_sfn_start;
+#include <stdlib.h>
+#include <string.h>
 
 void kstart(void) {
-    struct limine_framebuffer *framebuffer = create_fb();
-    memset((uint32_t *)framebuffer->address, 0x212121, framebuffer->width * framebuffer->height);
-    TerminalInfo terminal_info;
-    terminal_info.ptr = (uint8_t *)framebuffer->address;
-    terminal_info.bg = 0x212121;
-    terminal_info.fg = 0xa9fbff;
-    terminal_info.x = 32;
-    terminal_info.y = 32;
-    terminal_info.w = framebuffer->width;
-    terminal_info.h = framebuffer->height;
-    terminal_info.p = framebuffer->pitch;
-    set_terminal_state(terminal_info);
-    set_terminal_font(&_binary_font_sfn_start);
-    init_pmm();
-    puts("hi");
-    for(;;);
+  if (init_serial(COM1)) {
+    if (!init_terminal()) {
+      char *message = "Failed to initialize terminal, but found serial. \n"
+                      "Displaying to Serial...";
+      while (*message) {
+        put_serial(COM1, *message);
+        message++;
+      }
+    }
+    puts("Initialized terminal");
+    puts("Initialized serial");
+  }
+  init_pmm();
+  puts("Initialized pmm");
+  for (;;)
+    ;
 }
