@@ -27,7 +27,5 @@ void kinit(void) {
 }
 
 void kstart(void) {
-
-  for (;;)
-    ;
+  __asm__ volatile("hlt");
 }

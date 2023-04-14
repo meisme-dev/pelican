@@ -19,32 +19,27 @@ size_t strnlen(const char *str, size_t n) {
 
 char *strcat(char *dst, const char *src) {
     char *tmp = dst + strlen(dst);
-    while ((*tmp++ = *src++));
-    *tmp = '\0';
-    return dst;
+    while ((*dst++ = *src++));
+    return tmp;
 }
 
 char *strncat(char *dst, const char *src, size_t n) {
     char *tmp = dst + strnlen(dst, n);
-    size_t num = n - 1;
-    while ((*tmp++ = *src++) && num--);
-    *tmp = '\0';
-    return dst;
+    while ((*dst++ = *src++) && n--);
+    return tmp;
 }
 
 char *strcpy(char *dst, const char *src) {
     char *tmp = dst;
-    while((*tmp++ = *src++));
-    *tmp = '\0';
-    return dst;
+    while((*dst++ = *src++));
+    return tmp;
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
     char *tmp = dst;
-    size_t num = n;
-    while((*tmp++ = *src++) && num--);
+    while((*dst++ = *src++) && n--);
     *tmp = '\0';
-    return dst;
+    return tmp;
 }
 
 void *memset(void *ptr, int value, size_t n) {
