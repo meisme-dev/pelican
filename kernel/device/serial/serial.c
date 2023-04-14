@@ -20,7 +20,7 @@ bool init_serial(uint16_t port) {
     return true;
 }
 
-void put_serial(uint16_t port, const char c) {
+void serial_send(uint16_t port, const char c) {
     while((inb(port + 5) & 0x20) == 0);
     outb(port, c);
 }

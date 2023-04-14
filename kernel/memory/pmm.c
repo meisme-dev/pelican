@@ -79,12 +79,12 @@ void init_pmm(void) {
       break;
     }
   }
-  
+
   head[index].node.next = NULL;
   printf("There are %d blocks\n", index);
 
   for (uint64_t i = 0; i < index; i++) {
-    head[i].type == FREE ? put_serial(COM1, '#') : put_serial(COM1, '.');
+    head[i].type == FREE ? serial_send(COM1, '#') : serial_send(COM1, '.');
   }
 
   uint64_t block = alloc_block();

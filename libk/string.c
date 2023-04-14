@@ -48,8 +48,8 @@ char *strncpy(char *dst, const char *src, size_t n) {
 }
 
 void *memset(void *ptr, int value, size_t n) {
-    for(uint32_t i = 0; i < n; i++) {
-        *((uint32_t *)ptr + i) = value;
+    for(uint64_t i = 0; i < n; i++) {
+        *((uint64_t *)ptr + i) = value;
     }
     return ptr;
 }

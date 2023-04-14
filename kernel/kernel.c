@@ -6,13 +6,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-void kstart(void) {
+void kstart(void);
+
+void kinit(void) {
   if (init_serial(COM1)) {
     if (!init_terminal()) {
       char *message = "Failed to initialize terminal, but found serial. \n"
                       "Displaying to Serial...";
       while (*message) {
-        put_serial(COM1, *message);
+        serial_send(COM1, *message);
         message++;
       }
     }
@@ -21,6 +23,11 @@ void kstart(void) {
   }
   init_pmm();
   puts("Initialized pmm");
+  kstart();
+}
+
+void kstart(void) {
+
   for (;;)
     ;
 }

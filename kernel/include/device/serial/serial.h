@@ -8,6 +8,6 @@
 #define COM1 0x3f8
 
 bool init_serial(uint16_t port);
-void put_serial(uint16_t port, const char c);
+void serial_send(uint16_t port, const char c);
 
 #endif
