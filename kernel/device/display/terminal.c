@@ -68,6 +68,7 @@ void printf(char *format, ...) {
     while(*ptr) {
         if(*ptr == '%') {
             char str[20] = {' '};
+            str[19] = '\0';
             ptr++;
             switch(*ptr++) {
                 case 's':
