@@ -1,12 +1,11 @@
-#include "device/serial/serial.h"
-#include "stdlib.h"
-#include <stdbool.h>
-#include <stddef.h>
-
 #include <device/display/terminal.h>
+#include <device/serial/serial.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 static volatile struct limine_memmap_request request = {
@@ -19,10 +18,14 @@ static uint64_t index = 1;
 uint64_t alloc_block(void);
 bool free_block(uint64_t i);
 
-#define set_block_type(x)                                                      \
-  head[index - BLOCK_SIZE].node.next = &head[index];                           \
-  head[index].node.prev = &head[index - BLOCK_SIZE];                           \
-  head[index].type = x;
+#define SET_BLOCK_TYPES(x)                                                     \
+  for (uint64_t j = 0; j < request.response->entries[i]->length;               \
+       j += BLOCK_SIZE) {                                                      \
+    index++;                                                                   \
+    head[index - BLOCK_SIZE].node.next = &head[index];                         \
+    head[index].node.prev = &head[index - BLOCK_SIZE];                         \
+    head[index].type = x;                                                      \
+  }
 
 void init_pmm(void) {
   if (request.response->entries == NULL || request.response->entry_count == 0) {
@@ -49,6 +52,7 @@ void init_pmm(void) {
       break;
     }
   }
+
   head = (Block *)start_addr;
   head->index = 0;
   bool free_list_allocd = false;
@@ -61,32 +65,21 @@ void init_pmm(void) {
       if (request.response->entries[i + 1]->base > (uint64_t)start_addr &&
           !free_list_allocd) {
         free_list_allocd = true;
-        for (uint64_t j = 0; j < request.response->entries[i]->length;
-             j += BLOCK_SIZE) {
-          index++;
-          set_block_type(RESERVED);
-        }
+        SET_BLOCK_TYPES(RESERVED);
         break;
       }
       if (request.response->entries[i]->length < BLOCK_SIZE) {
         break;
       }
-      for (uint64_t j = 0; j < request.response->entries[i]->length;
-           j += BLOCK_SIZE) {
-        index++;
-        set_block_type(FREE);
-      }
+      SET_BLOCK_TYPES(FREE);
       break;
 
     default:
-      for (uint64_t j = 0; j < request.response->entries[i]->length;
-           j += BLOCK_SIZE) {
-        index++;
-        set_block_type(RESERVED);
-      }
+      SET_BLOCK_TYPES(RESERVED);
       break;
     }
   }
+  
   head[index].node.next = NULL;
   printf("There are %d blocks\n", index);
 
