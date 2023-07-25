@@ -29,7 +29,6 @@ bool init_terminal(void) {
     ssfn_dst.p = framebuffer->pitch;
     ssfn_src = (ssfn_font_t *)&_binary_font_sfn_start;
     term_failed = false;
-    trace();
     return true;
 }
 

@@ -1,17 +1,88 @@
 #include <descriptors/gdt.h>
+#include <device/display/terminal.h>
 
-void create_descriptors(GdtData *gdt_data, uint64_t* descriptors, size_t num) {
-    for(size_t i = 0; i < num; i++) {
-        descriptors[i]  = gdt_data[i].gdtr.limit & 0x000F0000;
-        descriptors[i] |= (gdt_data[i].flag << 8) & 0x00F0FF00;
-        descriptors[i] |= (gdt_data[i].gdtr.base >> 16) & 0x000000FF;
-        descriptors[i] |= gdt_data[i].gdtr.base & 0xFF000000;
-        descriptors[i] <<= 32;
-        descriptors[i] |= gdt_data[i].gdtr.base << 16;
-        descriptors[i] |= gdt_data[i].gdtr.limit & 0x0000FFFF;
-    }
+static void encode_entry(gdt_descriptor descriptor, Gdt gdt) {
+  descriptor[0] = gdt.gdt_s.limit & 0xFF;
+  descriptor[1] = (gdt.gdt_s.limit >> 8) & 0xFF;
+  descriptor[6] = (gdt.gdt_s.limit >> 16) & 0x0F;
+  descriptor[2] = gdt.gdt_s.base & 0xFF;
+  descriptor[3] = (gdt.gdt_s.base >> 8) & 0xFF;
+  descriptor[4] = (gdt.gdt_s.base >> 16) & 0xFF;
+  descriptor[7] = (gdt.gdt_s.base >> 24) & 0xFF;
+  descriptor[5] = gdt.gdt_s.access;
+  descriptor[6] |= (gdt.gdt_s.flags << 4);
 }
 
-void load_descriptor(Gdtr gdtr) {
-    __asm__ volatile("lgdt %0" :: "m"(gdtr) : "memory");
+static void create_descriptors(Gdt *gdt, gdt_descriptor *descriptors, size_t num) {
+  for (size_t i = 0; i < num; i++) {
+    encode_entry(descriptors[i], gdt[i]);
+  }
+}
+
+static void load_descriptor(Gdtr gdtr) {
+    __asm__ volatile("lgdt %0":: "m"(gdtr) : "memory");
+}
+
+void init_gdt() {
+    asm("cli");
+
+    const uint8_t desc_count = 8;
+    Tss *tss = {(Tss *)NULL};
+    uint32_t tss_lower = (uint64_t)tss & 0xffffffff;
+    uint32_t tss_upper = (uint64_t)tss >> 32;
+    gdt_descriptor descriptor[desc_count];
+    Gdt gdt[desc_count];
+
+    /* Null entry */
+    gdt[0].gdt_s.base = 0x0;
+    gdt[0].gdt_s.limit = 0x0;
+    gdt[0].gdt_s.access = 0x0;
+    gdt[0].gdt_s.flags = 0x0;
+
+    /* Kernel code */
+    gdt[1].gdt_s.base = 0x0;
+    gdt[1].gdt_s.limit = 0xFFFFF;
+    gdt[1].gdt_s.access = 0x9A;
+    gdt[1].gdt_s.flags = 0xA;
+
+    /* Kernel data */
+    gdt[2].gdt_s.base = 0x0;
+    gdt[2].gdt_s.limit = 0xFFFFF;
+    gdt[2].gdt_s.access = 0x92;
+    gdt[2].gdt_s.flags = 0xC;
+
+    /* Null entry */
+    gdt[3].gdt_s.base = 0x0;
+    gdt[3].gdt_s.limit = 0x0;
+    gdt[3].gdt_s.access = 0x0;
+    gdt[3].gdt_s.flags = 0x0;
+
+    /* User code */
+    gdt[4].gdt_s.base = 0x0;
+    gdt[4].gdt_s.limit = 0xFFFFF;
+    gdt[4].gdt_s.access = 0xFA;
+    gdt[4].gdt_s.flags = 0xA;
+
+    /* User data */
+    gdt[5].gdt_s.base = 0x0;
+    gdt[5].gdt_s.limit = 0xFFFFF;
+    gdt[5].gdt_s.access = 0xF2;
+    gdt[5].gdt_s.flags = 0xC;
+
+    /* TSS lower */
+    gdt[6].gdt_s.base = tss_lower;
+    gdt[6].gdt_s.limit = sizeof(Tss);
+    gdt[6].gdt_s.access = 0x89;
+    gdt[6].gdt_s.flags = 0x0;
+
+    /* TSS upper */
+    gdt[7].gdt_u = tss_upper;
+
+    create_descriptors(gdt, descriptor, desc_count);
+
+    Gdtr gdtr;
+    gdtr.offset = (uint64_t)&descriptor;
+    gdtr.size = sizeof(gdt);
+
+    load_descriptor(gdtr);
 }

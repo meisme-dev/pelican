@@ -2,6 +2,7 @@
 #include <device/display/terminal.h>
 #include <device/pci/pci.h>
 #include <device/serial/serial.h>
+#include <descriptors/gdt.h>
 #include <memory/pmm.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,12 +21,15 @@ void kinit(void) {
     }
     puts("Initialized terminal");
     puts("Initialized serial");
+    init_gdt();
+    puts("Initialized GDT");
+    uint64_t count;
+    init_pmm(&count);
+    puts("Initialized PMM");
+    kstart();
   }
-  init_pmm();
-  puts("Initialized pmm");
-  kstart();
 }
 
-void kstart(void) {
-  __asm__ volatile("hlt");
-}
+  void kstart(void) {
+    __asm__ volatile("hlt");
+  }

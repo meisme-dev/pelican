@@ -12,8 +12,8 @@ add_compile_options(
         -fno-stack-protector 
         -fno-stack-check 
         -fno-lto 
-        -fno-pie	
-        -fno-pic 
+        -fPIC
+        -fPIE
         -m64 
         -march=x86-64 
         -mabi=sysv 
@@ -22,7 +22,6 @@ add_compile_options(
         -mno-sse 
         -mno-sse2 
         -mno-red-zone 
-        -mcmodel=kernel 
         -masm=att 
         -Wall 
         -Wextra 

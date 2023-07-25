@@ -13,8 +13,8 @@ add_compile_options(
         -fno-stack-protector 
         -fno-stack-check 
         -fno-lto 
-        -fno-pie 
-        -fno-pic 
+        -fPIC
+        -fPIE
         -m64 
         -march=x86-64 
         -mabi=sysv 
@@ -23,7 +23,6 @@ add_compile_options(
         -mno-sse 
         -mno-sse2 
         -mno-red-zone 
-        -mcmodel=kernel 
         -masm=att 
         -Wall 
         -Wextra 
@@ -51,15 +50,15 @@ add_subdirectory(libk)
 add_executable(pelican ${PROJECT_SOURCE_DIR}/kernel/kernel.c)
 
 target_link_options(
-		pelican PRIVATE
-	  LINKER:-no-pie
+	pelican PRIVATE
+	LINKER:-pie
     LINKER:-static
     LINKER:-m
-		LINKER:elf_x86_64
+	LINKER:elf_x86_64
     LINKER:-z
-		LINKER:max-page-size=0x1000
+	LINKER:max-page-size=0x1000
     LINKER:-T
-		LINKER:${PROJECT_SOURCE_DIR}/linker.ld
+	LINKER:${PROJECT_SOURCE_DIR}/linker.ld
 )
 
 execute_process(
