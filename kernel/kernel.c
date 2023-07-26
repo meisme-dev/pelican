@@ -4,6 +4,7 @@
 #include <device/serial/serial.h>
 #include <descriptors/gdt.h>
 #include <memory/pmm.h>
+#include <system/panic.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,7 +25,9 @@ void kinit(void) {
     init_gdt();
     puts("Initialized GDT");
     uint64_t count;
-    init_pmm(&count);
+    if(!init_pmm(&count)){
+      panic("FAILED TO INITIALIZE PMM");
+    }
     puts("Initialized PMM");
     kstart();
   }

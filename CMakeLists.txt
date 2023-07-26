@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.0)
-project(pelican C)
+project(pelican C ASM)
 include_directories(${PROJECT_SOURCE_DIR}/libk/include ${PROJECT_SOURCE_DIR}/vendor ${PROJECT_SOURCE_DIR}/kernel/include)
 
 set(CMAKE_CXX_COMPILER_TARGET x86_64-unknown-none-elf)
@@ -17,6 +17,8 @@ add_compile_options(
         -fPIE
         -m64 
         -march=x86-64 
+		-ffile-prefix-map=${CMAKE_SOURCE_DIR}=
+        -fdebug-prefix-map=${CMAKE_SOURCE_DIR}=
         -mabi=sysv 
         -mno-80387 
         -mno-mmx 

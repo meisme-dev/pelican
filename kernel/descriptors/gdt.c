@@ -27,9 +27,12 @@ void init_gdt() {
     asm("cli");
 
     const uint8_t desc_count = 8;
-    Tss *tss = {(Tss *)NULL};
-    uint32_t tss_lower = (uint64_t)tss & 0xffffffff;
-    uint32_t tss_upper = (uint64_t)tss >> 32;
+    Tss tss = {0};
+    tss.ss0 = 0x10;
+    tss.iomap_base = sizeof(Tss);
+
+    uint32_t tss_lower = (uint64_t)&tss & 0xffffffff;
+    uint32_t tss_upper = (uint64_t)&tss >> 32;
     gdt_descriptor descriptors[desc_count];
     Gdt gdt[desc_count];
 

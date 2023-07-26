@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.0)
-project(kernel C)
+project(kernel C ASM)
 
 include_directories(${PROJECT_SOURCE_DIR}/../libk/include ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/../vendor)
 
@@ -34,6 +34,7 @@ set(kernel_src
         "device/display/terminal.c"
         "device/serial/serial.c"
         "device/pci/pci.c"
+        "system/panic.c"
         "memory/pmm.c"
 )
 

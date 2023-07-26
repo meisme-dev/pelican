@@ -8,14 +8,14 @@
 
 #include <stdarg.h>
 
-#define PADDING 32
+#define PADDING 0
 
 extern unsigned char _binary_font_sfn_start;
 bool term_failed = true;
-
+struct limine_framebuffer *framebuffer;
 
 bool init_terminal(void) {
-    struct limine_framebuffer *framebuffer = create_fb();
+    framebuffer = create_fb();
     if(framebuffer == NULL) {
         return false;
     }
@@ -25,16 +25,27 @@ bool init_terminal(void) {
     ssfn_dst.x = PADDING;
     ssfn_dst.y = PADDING;
     ssfn_dst.w = framebuffer->width;
-    ssfn_dst.h = framebuffer->height;
+    ssfn_dst.h = framebuffer->height
+    ;
     ssfn_dst.p = framebuffer->pitch;
     ssfn_src = (ssfn_font_t *)&_binary_font_sfn_start;
     term_failed = false;
     return true;
 }
 
+void reset_pos(void) {
+    ssfn_dst.x = PADDING;
+    ssfn_dst.y = PADDING;
+}
+
+void set_col(uint32_t bg, uint32_t fg) {
+    ssfn_dst.bg = bg;
+    ssfn_dst.fg = fg;
+}
+
 static void newline(void) {
     ssfn_dst.x = PADDING;
-    ssfn_dst.y += ssfn_dst.p / ssfn_dst.h + (PADDING / 2);
+    ssfn_dst.y += ssfn_src->height;
 }
 
 void kputchar(const char c) {

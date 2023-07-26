@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.0)
-project(libk C)
+project(libk C ASM)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 set(CMAKE_CXX_COMPILER_TARGET x86_64-unknown-none-elf)

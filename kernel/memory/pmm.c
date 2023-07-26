@@ -1,4 +1,3 @@
-#include <device/display/terminal.h>
 #include <device/serial/serial.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
@@ -67,8 +66,6 @@ void *init_pmm(uint64_t *count) {
         break;
     }
   }
-
-  printf("%u/%u blocks reserved for paging structures\n", (c * sizeof(Block)) / BLOCK_SIZE, total_blocks);
 
   count = &c;
   return head;
