@@ -30,6 +30,8 @@ add_compile_options(
 
 set(kernel_src
         "descriptors/gdt.c"
+        "descriptors/idt.c"
+        "descriptors/idt.s"
         "device/display/framebuffer.c"
         "device/display/terminal.c"
         "device/serial/serial.c"

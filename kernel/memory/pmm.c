@@ -67,6 +67,6 @@ void *init_pmm(uint64_t *count) {
     }
   }
 
-  count = &c;
+  *count = c;
   return head;
 }
