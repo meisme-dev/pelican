@@ -30,7 +30,7 @@ void init_gdt() {
     Tss *tss = {(Tss *)NULL};
     uint32_t tss_lower = (uint64_t)tss & 0xffffffff;
     uint32_t tss_upper = (uint64_t)tss >> 32;
-    gdt_descriptor descriptor[desc_count];
+    gdt_descriptor descriptors[desc_count];
     Gdt gdt[desc_count];
 
     /* Null entry */
@@ -75,14 +75,16 @@ void init_gdt() {
     gdt[6].gdt_s.access = 0x89;
     gdt[6].gdt_s.flags = 0x0;
 
-    /* TSS upper */
-    gdt[7].gdt_u = tss_upper;
+    create_descriptors(gdt, descriptors, desc_count);
 
-    create_descriptors(gdt, descriptor, desc_count);
+    descriptors[7][0] = tss_upper & 0xff;
+    descriptors[7][1] = (tss_upper >> 8) & 0xff;
+    descriptors[7][2] = (tss_upper >> 16) & 0xff;
+    descriptors[7][3] = (tss_upper >> 24) & 0xff;
 
     Gdtr gdtr;
-    gdtr.offset = (uint64_t)&descriptor;
-    gdtr.size = sizeof(gdt);
+    gdtr.offset = (uint64_t)&descriptors;
+    gdtr.size = (desc_count * sizeof(uint64_t)) - 1;
 
-    load_descriptor(gdtr);
+   load_descriptor(gdtr);
 }

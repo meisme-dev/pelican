@@ -28,7 +28,7 @@ typedef struct __attribute__((__packed__)) {
   uint16_t flags;
 } Gdt_s;
 
-typedef union {
+typedef union __attribute__((__packed__)) {
   Gdt_s gdt_s;
   uint64_t gdt_u;
 } Gdt;
