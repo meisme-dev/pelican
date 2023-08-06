@@ -32,8 +32,8 @@ typedef struct __attribute__((__packed__)) {
 } _gdt_entry_t;
 
 typedef struct __attribute__((__packed__)) {
-	uint16_t size;
-	uint64_t offset;
+  uint16_t size;
+  uint64_t offset;
 } _gdtr_t;
 
 typedef struct __attribute__((__packed__)) {

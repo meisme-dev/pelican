@@ -7,18 +7,18 @@ static void gdt_load_descriptor(_gdtr_t gdtr) {
 }
 
 void gdt_init() {
-    asm("cli");
+  asm("cli");
 
-    const uint8_t desc_count = 8;
+  const uint8_t desc_count = 8;
   _tss_t tss = {0};
-    tss.ss0 = 0x10;
+  tss.ss0 = 0x10;
   tss.iomap_base = sizeof(_tss_t);
 
-    uint32_t tss_lower = (uint64_t)&tss & 0xffffffff;
-    uint32_t tss_upper = (uint64_t)&tss >> 32;
+  uint32_t tss_lower = (uint64_t)&tss & 0xffffffff;
+  uint32_t tss_upper = (uint64_t)&tss >> 32;
   _gdt_entry_t gdt[desc_count];
 
-    /* Null entry */
+  /* Null entry */
   gdt[0].base0 = 0x0;
   gdt[0].limit0 = 0x0;
   gdt[0].base1 = 0x0;
@@ -27,7 +27,7 @@ void gdt_init() {
   gdt[0].flags = 0x0;
   gdt[0].base2 = 0x0;
 
-    /* Kernel code */
+  /* Kernel code */
   gdt[1].base0 = 0x0;
   gdt[1].limit0 = 0xfffff & 0xffff;
   gdt[1].base1 = 0x0;
@@ -36,7 +36,7 @@ void gdt_init() {
   gdt[1].flags = 0xA;
   gdt[1].base2 = 0x0;
 
-    /* Kernel data */
+  /* Kernel data */
   gdt[2].base0 = 0x0;
   gdt[2].limit0 = 0xfffff & 0xffff;
   gdt[2].base1 = 0x0;
@@ -45,7 +45,7 @@ void gdt_init() {
   gdt[2].flags = 0xC;
   gdt[2].base2 = 0x0;
 
-    /* Null entry */
+  /* Null entry */
   gdt[3].base0 = 0x0;
   gdt[3].limit0 = 0xfffff & 0xffff;
   gdt[3].base1 = 0x0;
@@ -54,7 +54,7 @@ void gdt_init() {
   gdt[3].flags = 0x0;
   gdt[3].base2 = 0x0;
 
-    /* User code */
+  /* User code */
   gdt[4].base0 = 0x0;
   gdt[4].limit0 = 0xfffff & 0xffff;
   gdt[4].base1 = 0x0;
@@ -63,7 +63,7 @@ void gdt_init() {
   gdt[4].flags = 0xA;
   gdt[4].base2 = 0x0;
 
-    /* User data */
+  /* User data */
   gdt[5].base0 = 0x0;
   gdt[5].limit0 = 0xfffff & 0xffff;
   gdt[5].base1 = 0x0;
@@ -72,7 +72,7 @@ void gdt_init() {
   gdt[5].flags = 0xC;
   gdt[5].base2 = 0x0;
 
-    /* TSS lower */
+  /* TSS lower */
   gdt[6].base0 = tss_lower & 0xffff;
   gdt[6].limit0 = sizeof(_tss_t) & 0xffff;
   gdt[6].base1 = tss_lower >> 16 & 0xff;
