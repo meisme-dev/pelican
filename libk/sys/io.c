@@ -1,5 +1,9 @@
 #include <sys/io.h>
 
+#ifdef __arm__
+#error ARM IO not implemented
+#endif
+
 uint32_t inl(uint16_t port) {
     uint32_t data;
     __asm__ volatile("inl %1, %0" : "=a"(data) : "Nd"(port));
