@@ -34,6 +34,7 @@ set(kernel_src
         "descriptors/idt.s"
         "device/display/framebuffer.c"
         "device/display/terminal.c"
+        "device/display/log.c"
         "device/serial/serial.c"
         "device/pci/pci.c"
         "system/panic.c"
