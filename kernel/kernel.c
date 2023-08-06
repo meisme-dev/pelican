@@ -33,12 +33,7 @@ void kinit(void) {
       message++;
     }
   }
-  init_gdt();
-  set_col(0x0, 0x44bb66);
-  printf("[INIT] ");
-  set_col(0x0, 0xffffff);
-  puts("Initialized GDT");
-  Block *head = (Block *)NULL;
+  gdt_init();
   uint64_t count = 0;
   if (!(head = (Block *)init_pmm(&count))) {
     panic("FAILED TO INITIALIZE PMM");

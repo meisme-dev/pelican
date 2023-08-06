@@ -1,5 +1,4 @@
-#ifndef GDT_H
-#define GDT_H
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -21,22 +20,21 @@
 #define C_XRC 0xE
 #define C_XRCA 0xF
 
+
 typedef struct __attribute__((__packed__)) {
-  uint32_t base;
-  uint32_t limit;
-  uint16_t access;
-  uint16_t flags;
-} Gdt_s;
+  uint16_t base0;
+  uint16_t limit0;
+  uint8_t base1;
+  uint8_t access;
+  uint8_t limit1 : 4;
+  uint8_t flags : 4;
+  uint8_t base2;
+} _gdt_entry_t;
 
-typedef union __attribute__((__packed__)) {
-  Gdt_s gdt_s;
-  uint64_t gdt_u;
-} Gdt;
-
-typedef struct  __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) {
 	uint16_t size;
 	uint64_t offset;
-} Gdtr;
+} _gdtr_t;
 
 typedef struct __attribute__((__packed__)) {
   uint32_t prev_tss;
@@ -66,10 +64,8 @@ typedef struct __attribute__((__packed__)) {
   uint32_t ldt;
   uint16_t trap;
   uint16_t iomap_base;
-} Tss;
+} _tss_t;
 
 typedef uint8_t gdt_descriptor[8];
 
-void init_gdt();
-
-#endif
+void gdt_init();
