@@ -7,6 +7,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib")
 set(CMAKE_EXECUTABLE_SUFFIX_C .elf)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(ARCH x86-64)
+set(LINKER_TARGET elf_x86_64)
+
 add_compile_options(
         -std=gnu11 
         -ffreestanding 
@@ -16,7 +19,7 @@ add_compile_options(
         -fPIC
         -fPIE
         -m64 
-        -march=x86-64 
+        -march=${ARCH} 
 		-ffile-prefix-map=${CMAKE_SOURCE_DIR}=
         -fdebug-prefix-map=${CMAKE_SOURCE_DIR}=
         -mabi=sysv 
@@ -56,7 +59,7 @@ target_link_options(
 	LINKER:-pie
     LINKER:-static
     LINKER:-m
-	LINKER:elf_x86_64
+	LINKER:${LINKER_TARGET}
     LINKER:-z
 	LINKER:max-page-size=0x1000
     LINKER:-T
@@ -71,7 +74,7 @@ execute_process(
                 -b binary 
 				font.sfn
                 -o ${CMAKE_CURRENT_BINARY_DIR}/font.o
-				-m elf_x86_64
+				-m ${LINKER_TARGET}
 )
 
 target_link_libraries(pelican ${CMAKE_CURRENT_BINARY_DIR}/font.o libk kernel)
@@ -82,7 +85,7 @@ add_custom_command(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BI
 )
 
 add_custom_command(COMMAND ${CMAKE_COMMAND} -E copy 	
-				${CMAKE_CURRENT_BINARY_DIR}/pelican.elf
+				${CMAKE_CURRENT_BINARY_DIR}/pelican${CMAKE_EXECUTABLE_SUFFIX_C}
 				${CMAKE_SOURCE_DIR}/limine.cfg 
 				${CMAKE_SOURCE_DIR}/vendor/limine/limine.sys
 				${CMAKE_SOURCE_DIR}/vendor/limine/limine-cd.bin

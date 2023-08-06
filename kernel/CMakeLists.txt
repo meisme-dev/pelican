@@ -6,6 +6,8 @@ include_directories(${PROJECT_SOURCE_DIR}/../libk/include ${PROJECT_SOURCE_DIR}/
 set(CMAKE_CXX_COMPILER_TARGET x86_64-unknown-none-elf)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(ARCH x86-64)
+
 add_compile_options(
         -std=gnu11 
         -ffreestanding 
@@ -15,7 +17,9 @@ add_compile_options(
         -fPIC
         -fPIE
         -m64 
-        -march=x86-64 
+        -march=${ARCH} 
+	-ffile-prefix-map=${CMAKE_SOURCE_DIR}=
+        -fdebug-prefix-map=${CMAKE_SOURCE_DIR}=
         -mabi=sysv 
         -mno-80387 
         -mno-mmx 
