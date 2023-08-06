@@ -5,6 +5,7 @@
 void itoa(int64_t x, char *str) {
     uint8_t i = 0;
     int8_t mult = 1;
+    str[0] = '0';
     if(x < 0) {
         str[0] = '-';
         mult = -1;

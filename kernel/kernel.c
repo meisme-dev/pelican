@@ -8,12 +8,15 @@
 #include <string.h>
 #include <system/panic.h>
 
-struct kernel_state {
-  Block *head;
+typedef struct {
+  _block_t *head;
+  uint32_t *pci_ids;
+  uint16_t pci_count;
+  _pci_device_t *pci_devices;
   uint64_t mem_list_count;
-};
+} _kernel_state_t;
 
-void kstart(struct kernel_state state);
+static void kstart(_kernel_state_t state);
 
 void kinit(void) {
   if (init_terminal()) {
@@ -35,27 +38,31 @@ void kinit(void) {
   }
   gdt_init();
   uint64_t count = 0;
-  if (!(head = (Block *)init_pmm(&count))) {
-    panic("FAILED TO INITIALIZE PMM");
+  _pci_device_t pci_devices[32];
+  uint32_t pci_ids[32];
+  uint16_t pci_count = pci_enumerate_devices(pci_devices);
+  for (uint16_t i = 0; i < pci_count; i++) {
+    pci_ids[i] = pci_get_vendor_id(pci_devices[i]);
   }
-  set_col(0x0, 0x44bb66);
-  printf("[INIT] ");
-  set_col(0x0, 0xffffff);
-  puts("Initialized PMM");
-  struct kernel_state state;
+  log(SUCCESS, "Initialized PCI");
+  _kernel_state_t state;
   state.head = head;
+  state.pci_count = pci_count;
+  state.pci_ids = pci_ids;
+  state.pci_devices = pci_devices;
   state.mem_list_count = count;
   kstart(state);
 }
 
-void kstart(struct kernel_state state) {
-  set_col(0x0, 0x4499FF);
-  printf("[INFO] ");
-  set_col(0x0, 0xffffff);
-  printf("Resolution: %ux%ux%u\n", framebuffer->width, framebuffer->height, framebuffer->bpp);
-  set_col(0x0, 0x4499FF);
-  printf("[INFO] ");
-  set_col(0x0, 0xffffff);
-  printf("Memory: %u bytes\n", state.mem_list_count * BLOCK_SIZE);
+static void kstart(_kernel_state_t state) {
+  log(INFO, "Resolution: %ux%ux%u", framebuffer->width, framebuffer->height, framebuffer->bpp);
+  log(INFO, "Memory: %u bytes", state.mem_list_count * BLOCK_SIZE);
+  for (uint16_t i = 0; i < state.pci_count; i++) {
+    for (uint32_t j = 0; j < 2338; j++) {
+      if (state.pci_ids[i] == vendors[j].id) {
+        log(INFO, "PCI: %s 0%u:0%u.%u", vendors[j].name, state.pci_devices[i].bus, state.pci_devices[i].slot, state.pci_devices[i].func);
+      }
+    }
+  }
   __asm__ volatile("hlt");
 }

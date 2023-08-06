@@ -1,5 +1,4 @@
-#ifndef FRAMEBUFFER_H
-#define FRAMEBUFFER_H
+#pragma once
 #include <limine/limine.h>
-struct limine_framebuffer *create_fb(void);
-#endif
+struct limine_framebuffer *framebuffer_create(void);
+
