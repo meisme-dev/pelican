@@ -1,3 +1,4 @@
+#include <device/display/terminal.h>
 #include <string.h>
 #include <system/panic.h>
 

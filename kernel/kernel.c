@@ -1,7 +1,9 @@
 #include <descriptors/gdt.h>
 #include <device/display/framebuffer.h>
+#include <device/display/log.h>
 #include <device/display/terminal.h>
 #include <device/pci/pci.h>
+#include <device/pci/vendors.h>
 #include <device/serial/serial.h>
 #include <memory/pmm.h>
 #include <stdlib.h>
@@ -16,20 +18,15 @@ typedef struct {
   uint64_t mem_list_count;
 } _kernel_state_t;
 
+
 static void kstart(_kernel_state_t state);
 
 void kinit(void) {
-  if (init_terminal()) {
-    set_col(0x0, 0x44bb66);
-    printf("[INIT] ");
-    set_col(0x0, 0xffffff);
-    puts("Initialized Terminal");
+  if (terminal_init()) {
+    log(SUCCESS, "Initialized Terminal");
   }
-  if (init_serial(COM1)) {
-    set_col(0x0, 0x44bb66);
-    printf("[INIT] ");
-    set_col(0x0, 0xffffff);
-    puts("Initialized COM1");
+  if (serial_init(COM1)) {
+    log(SUCCESS, "Initialized COM1");
     char *message = "Test";
     while (*message) {
       serial_send(COM1, *message);
@@ -37,7 +34,13 @@ void kinit(void) {
     }
   }
   gdt_init();
+  log(SUCCESS, "Initialized GDT");
+  _block_t *head = (_block_t *)NULL;
   uint64_t count = 0;
+  if (!(head = (_block_t *)pmm_init(&count))) {
+    panic("Failed to initialize PMM");
+  }
+  log(SUCCESS, "Initialized PMM");
   _pci_device_t pci_devices[32];
   uint32_t pci_ids[32];
   uint16_t pci_count = pci_enumerate_devices(pci_devices);
