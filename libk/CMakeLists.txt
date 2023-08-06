@@ -28,7 +28,6 @@ add_compile_options(
         -masm=att 
         -Wall 
         -Wextra 
-	-fno-omit-frame-pointer
         -pedantic
 )
 
