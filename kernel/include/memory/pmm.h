@@ -1,5 +1,4 @@
-#ifndef PMM_H
-#define PMM_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -17,8 +16,6 @@ enum block_type {
 typedef struct {
     bool used;
     uint64_t index;
-} Block /* __attribute__((aligned(BLOCK_SIZE))) */;
+} _block_t /* __attribute__((aligned(BLOCK_SIZE))) */;
 
-void *init_pmm(uint64_t *count);
-
-#endif
+void *pmm_init(uint64_t *count);

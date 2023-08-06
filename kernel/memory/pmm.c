@@ -6,9 +6,9 @@
 
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
 
-Block *head = NULL;
+_block_t *head = NULL;
 
-void *init_pmm(uint64_t *count) {
+void *pmm_init(uint64_t *count) {
   if (request.response->entry_count == 0) {
     return NULL;
   }
@@ -28,8 +28,8 @@ void *init_pmm(uint64_t *count) {
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
     switch (request.response->entries[i]->type) {
       case LIMINE_MEMMAP_USABLE:
-        if (request.response->entries[i]->length > sizeof(Block) * total_blocks && reserved == false) {
-          head = (Block *)request.response->entries[i]->base;
+        if (request.response->entries[i]->length > sizeof(_block_t) * total_blocks && reserved == false) {
+          head = (_block_t *)request.response->entries[i]->base;
           reserved = true;
           reserved_start = request.response->entries[i]->base / BLOCK_SIZE;
           for (uint64_t offset = 0; offset < request.response->entries[i]->length / BLOCK_SIZE; offset++, c++) {

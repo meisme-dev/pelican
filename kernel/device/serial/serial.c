@@ -1,7 +1,7 @@
 #include <device/display/terminal.h>
 #include <device/serial/serial.h>
 
-bool init_serial(uint16_t port) {
+bool serial_init(uint16_t port) {
     outb(port + 1, 0x00);
     outb(port + 3, 0x80);
     outb(port + 0, 0x0C); // 9600 baud
