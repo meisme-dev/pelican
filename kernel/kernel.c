@@ -18,7 +18,6 @@ typedef struct {
   uint64_t mem_list_count;
 } _kernel_state_t;
 
-
 static void kstart(_kernel_state_t state);
 
 void kinit(void) {

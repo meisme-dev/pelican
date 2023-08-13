@@ -1,7 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 size_t strlen(const char *str);
 size_t strnlen(const char *str, size_t n);
 char *strcat(char *dst, const char *src);

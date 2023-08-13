@@ -50,7 +50,7 @@ void *pmm_init(uint64_t *count) {
       case LIMINE_MEMMAP_USABLE:
         for (uint64_t offset = 0; offset < request.response->entries[i]->length / BLOCK_SIZE; offset++, c++) {
           uint64_t index = (request.response->entries[i]->base / BLOCK_SIZE) + offset;
-          if(index > reserved_start && index < reserved_end) {
+          if (index > reserved_start && index < reserved_end) {
             break;
           }
           head[c].used = FREE;

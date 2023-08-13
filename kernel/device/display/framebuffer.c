@@ -3,12 +3,11 @@
 
 static volatile struct limine_framebuffer_request request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST,
-    .revision = 0
-};
+    .revision = 0};
 
 struct limine_framebuffer *framebuffer_create(void) {
-    if(request.response == NULL || request.response->framebuffer_count < 1) {
-        return NULL;
-    }
-    return request.response->framebuffers[0];
+  if (request.response == NULL || request.response->framebuffer_count < 1) {
+    return NULL;
+  }
+  return request.response->framebuffers[0];
 }

@@ -20,7 +20,6 @@
 #define C_XRC 0xE
 #define C_XRCA 0xF
 
-
 typedef struct __attribute__((__packed__)) {
   uint16_t base0;
   uint16_t limit0;
