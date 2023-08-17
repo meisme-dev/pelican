@@ -8,14 +8,15 @@
 
 #define BLOCK_SIZE 4096
 
-enum block_type {
+enum block_types {
   FREE,
   USED,
+  RESERVED,
 };
 
 typedef struct {
-  bool used;
-  uint64_t index;
-} _block_t /* __attribute__((aligned(BLOCK_SIZE))) */;
+  enum block_types block_type;
+} _block_t;
 
-void *pmm_init(uint64_t *count);
+uint64_t pmm_get_blocks();
+void pmm_init(_block_t *blocks);

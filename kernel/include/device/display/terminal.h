@@ -11,6 +11,7 @@ bool terminal_init(void);
 void printf(char *format, ...);
 void vprintf(char *format, va_list args);
 void puts(const char *str);
+void kputs(const char *c);
 void kputchar(const char c);
 void reset_pos(void);
 void set_col(uint32_t bg, uint32_t fg);

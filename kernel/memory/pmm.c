@@ -1,4 +1,6 @@
 #include <device/serial/serial.h>
+#include <device/display/terminal.h>
+#include <device/display/log.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
 #include <stdlib.h>
@@ -6,67 +8,29 @@
 
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
 
-_block_t *head = NULL;
-
-void *pmm_init(uint64_t *count) {
+uint64_t pmm_get_blocks() {
   if (request.response->entry_count == 0) {
-    return NULL;
+    return 0;
   }
-
-  uint64_t total_blocks = 0;
-  uint64_t total_mem = 0;
-  for (uint64_t i = 0; i < request.response->entry_count; i++) {
-    total_mem += request.response->entries[i]->length;
-  }
-  total_blocks = total_mem / BLOCK_SIZE;
-
   uint64_t c = 0;
-  uint64_t reserved_start = 0;
-  uint64_t reserved_end = 0;
-  bool reserved = false;
-
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
+    struct limine_memmap_entry *current_entry = request.response->entries[i];
+    c += (current_entry->length / BLOCK_SIZE);
+  }
+  return c;
+}
+
+void pmm_init(_block_t *blocks) {
+  for (uint64_t i = 0; i < request.response->entry_count; i++) {
+    struct limine_memmap_entry *current_entry = request.response->entries[i];
     switch (request.response->entries[i]->type) {
       case LIMINE_MEMMAP_USABLE:
-        if (request.response->entries[i]->length > sizeof(_block_t) * total_blocks && reserved == false) {
-          head = (_block_t *)request.response->entries[i]->base;
-          reserved = true;
-          reserved_start = request.response->entries[i]->base / BLOCK_SIZE;
-          for (uint64_t offset = 0; offset < request.response->entries[i]->length / BLOCK_SIZE; offset++, c++) {
-            uint64_t index = (request.response->entries[i]->base / BLOCK_SIZE) + offset;
-            head[c].used = USED;
-            head[c].index = index;
-          }
-          reserved_end = head[c].index;
-        }
+        blocks[(current_entry->base + current_entry->length) / BLOCK_SIZE].block_type = FREE;
         break;
+
       default:
+        blocks[(current_entry->base + current_entry->length) / BLOCK_SIZE].block_type = RESERVED;
         break;
     }
   }
-
-  for (uint64_t i = 0; i < request.response->entry_count; i++) {
-    switch (request.response->entries[i]->type) {
-      case LIMINE_MEMMAP_USABLE:
-        for (uint64_t offset = 0; offset < request.response->entries[i]->length / BLOCK_SIZE; offset++, c++) {
-          uint64_t index = (request.response->entries[i]->base / BLOCK_SIZE) + offset;
-          if (index > reserved_start && index < reserved_end) {
-            break;
-          }
-          head[c].used = FREE;
-          head[c].index = index;
-        }
-        break;
-      default:
-        for (uint64_t offset = 0; offset < request.response->entries[i]->length / BLOCK_SIZE; offset++, c++) {
-          uint64_t index = (request.response->entries[i]->base / BLOCK_SIZE) + offset;
-          head[c].used = USED;
-          head[c].index = index;
-        }
-        break;
-    }
-  }
-
-  *count = c;
-  return head;
 }

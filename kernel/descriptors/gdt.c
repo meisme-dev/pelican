@@ -1,98 +1,52 @@
 #include <descriptors/gdt.h>
-#include <device/display/terminal.h>
+#include <string.h>
 
-static void gdt_load_descriptor(_gdtr_t gdtr) {
-  __asm__ volatile("lgdt %0" ::"m"(gdtr)
-                   : "memory");
+#define DESC_COUNT 8
+
+// MUST BE GLOBAL OR WILL BE DROPPED
+_tss_t tss = {0};
+_gdt_entry_t gdt[DESC_COUNT];
+
+static void gdt_set_entry(_gdt_entry_t *entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) {
+  entry->base0 = base & 0xffff;
+  entry->limit0 = limit & 0xffff;
+  entry->base1 = base >> 16 & 0xff;
+  entry->access = access;
+  entry->limit1 = limit >> 16 & 0xf;
+  entry->flags = flags & 0xf;
+  entry->base2 = base >> 24 & 0xff;
+}
+
+static void gdt_set_tss(_gdt_entry_t *entries) {
+  entries[0].base0 = sizeof(tss) - 1;
+  entries[0].limit0 = (uint64_t)&tss & 0xffff;
+  entries[0].base1 = ((uint64_t)&tss >> 16) & 0xff;
+  entries[0].access = 0x89;
+  entries[0].limit1 = 0x0;
+  entries[0].flags = 0x0;
+  entries[0].base2 = ((uint64_t)&tss >> 24) & 0xff;
+
+  entries[1].base0 = ((uint64_t)&tss >> 32) & 0xffff;
+  entries[1].limit0 = ((uint64_t)&tss >> 48) & 0xffff;
+  entries[1].base1 = 0x0;
+  entries[1].access = 0x0;
+  entries[1].limit1 = 0x0;
+  entries[1].flags = 0x0;
+  entries[1].base2 = 0x0;
 }
 
 void gdt_init() {
-  asm("cli");
+  tss.iopb = sizeof(_tss_t);
 
-  const uint8_t desc_count = 8;
-  _tss_t tss = {0};
-  tss.ss0 = 0x10;
-  tss.iomap_base = sizeof(_tss_t);
-
-  uint32_t tss_lower = (uint64_t)&tss & 0xffffffff;
-  uint32_t tss_upper = (uint64_t)&tss >> 32;
-  _gdt_entry_t gdt[desc_count];
-
-  /* Null entry */
-  gdt[0].base0 = 0x0;
-  gdt[0].limit0 = 0x0;
-  gdt[0].base1 = 0x0;
-  gdt[0].access = 0x0;
-  gdt[0].limit1 = 0x0;
-  gdt[0].flags = 0x0;
-  gdt[0].base2 = 0x0;
-
-  /* Kernel code */
-  gdt[1].base0 = 0x0;
-  gdt[1].limit0 = 0xfffff & 0xffff;
-  gdt[1].base1 = 0x0;
-  gdt[1].access = 0x9A;
-  gdt[1].limit1 = 0xfffff >> 16 & 0xffff;
-  gdt[1].flags = 0xA;
-  gdt[1].base2 = 0x0;
-
-  /* Kernel data */
-  gdt[2].base0 = 0x0;
-  gdt[2].limit0 = 0xfffff & 0xffff;
-  gdt[2].base1 = 0x0;
-  gdt[2].access = 0x92;
-  gdt[2].limit1 = 0xfffff >> 16 & 0xffff;
-  gdt[2].flags = 0xC;
-  gdt[2].base2 = 0x0;
-
-  /* Null entry */
-  gdt[3].base0 = 0x0;
-  gdt[3].limit0 = 0xfffff & 0xffff;
-  gdt[3].base1 = 0x0;
-  gdt[3].access = 0x0;
-  gdt[3].limit1 = 0xfffff >> 16 & 0xffff;
-  gdt[3].flags = 0x0;
-  gdt[3].base2 = 0x0;
-
-  /* User code */
-  gdt[4].base0 = 0x0;
-  gdt[4].limit0 = 0xfffff & 0xffff;
-  gdt[4].base1 = 0x0;
-  gdt[4].access = 0xFA;
-  gdt[4].limit1 = 0xfffff >> 16 & 0xffff;
-  gdt[4].flags = 0xA;
-  gdt[4].base2 = 0x0;
-
-  /* User data */
-  gdt[5].base0 = 0x0;
-  gdt[5].limit0 = 0xfffff & 0xffff;
-  gdt[5].base1 = 0x0;
-  gdt[5].access = 0xF2;
-  gdt[5].limit1 = 0xfffff >> 16 & 0xffff;
-  gdt[5].flags = 0xC;
-  gdt[5].base2 = 0x0;
-
-  /* TSS lower */
-  gdt[6].base0 = tss_lower & 0xffff;
-  gdt[6].limit0 = sizeof(_tss_t) & 0xffff;
-  gdt[6].base1 = tss_lower >> 16 & 0xff;
-  gdt[6].access = 0x89;
-  gdt[6].limit1 = sizeof(_tss_t) >> 16 & 0xff;
-  gdt[6].flags = 0x0;
-  gdt[6].base2 = tss_lower >> 24 & 0xffff;
-
-  /* TSS upper */
-  gdt[7].base0 = tss_upper & 0xffff;
-  gdt[7].limit0 = tss_upper >> 16 & 0xffff;
-  gdt[7].base1 = 0x0;
-  gdt[7].access = 0x0;
-  gdt[7].limit1 = 0x0;
-  gdt[7].flags = 0x0;
-  gdt[7].base2 = 0x0;
-
-  _gdtr_t gdtr;
-  gdtr.offset = (uint64_t)&gdt;
-  gdtr.size = (desc_count * sizeof(_gdt_entry_t)) - 1;
-
-  gdt_load_descriptor(gdtr);
+  gdt_set_entry(&gdt[0], 0x0, 0x0, 0x0, 0x0);                              // Null
+  gdt_set_entry(&gdt[1], 0x0, 0x0, 0x9A, 0xA);                             // Kernel code
+  gdt_set_entry(&gdt[2], 0x0, 0x0, 0x92, 0xC);                             // Kernel data
+  gdt_set_entry(&gdt[3], 0x0, 0x0, 0x0, 0x0);                              // Null
+  gdt_set_entry(&gdt[4], 0x0, 0x0, 0xFA, 0xA);                             // User code
+  gdt_set_entry(&gdt[5], 0x0, 0x0, 0xF2, 0xC);                             // User data
+  gdt_set_tss(&gdt[6]);                                                    // TSS
+  gdt_load((DESC_COUNT * sizeof(_gdt_entry_t)) - 1, (uint64_t)&gdt, 0x30); // 0x30 is the 6th entry
+  gdt_segments_reload();
 }
+
+#undef DESC_COUNT

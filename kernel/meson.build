@@ -1,0 +1,15 @@
+kernel_sources = files([
+  'kernel.c',
+  'descriptors/gdt.s',
+  'descriptors/idt.s',
+  'descriptors/gdt.c',
+  'descriptors/idt.c',
+  'device/display/framebuffer.c',
+  'device/display/terminal.c',
+  'device/display/log.c',
+  'device/display/psf.c',
+  'device/serial/serial.c',
+  'device/pci/pci.c',
+  'system/panic.c',
+  'memory/pmm.c',
+])

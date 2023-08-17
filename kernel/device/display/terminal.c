@@ -3,62 +3,56 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#define SSFN_CONSOLEBITMAP_TRUECOLOR
-#include <ssf/ssfn.h>
+#include <device/display/psf.h>
 
 #include <stdarg.h>
 
+extern char _binary____assets_font_psf_start[];
+
 #define PADDING 0
 
-extern unsigned char _binary_font_sfn_start;
-bool term_failed = true;
 struct limine_framebuffer *framebuffer;
+
+static uint32_t x = 0, y = 0, fg = 0xffffff, bg = 0;
+static _psf_font_t *psf_font;
+
 
 bool terminal_init(void) {
   framebuffer = framebuffer_create();
   if (framebuffer == NULL) {
     return false;
   }
-  ssfn_dst.ptr = (uint8_t *)framebuffer->address;
-  ssfn_dst.bg = 0x000000;
-  ssfn_dst.fg = 0xffffff;
-  ssfn_dst.x = PADDING;
-  ssfn_dst.y = PADDING;
-  ssfn_dst.w = framebuffer->width;
-  ssfn_dst.h = framebuffer->height;
-  ssfn_dst.p = framebuffer->pitch;
-  ssfn_src = (ssfn_font_t *)&_binary_font_sfn_start;
-  term_failed = false;
+  psf_font = (_psf_font_t *)&_binary____assets_font_psf_start;
+  psf_init((_psf_font_t *)&_binary____assets_font_psf_start);
   return true;
 }
 
 void reset_pos(void) {
-  ssfn_dst.x = PADDING;
-  ssfn_dst.y = PADDING;
+  x = 0;
+  y = 0;
 }
 
-void set_col(uint32_t bg, uint32_t fg) {
-  ssfn_dst.bg = bg;
-  ssfn_dst.fg = fg;
+void set_col(uint32_t nbg, uint32_t nfg) {
+  bg = nbg;
+  fg = nfg;
 }
 
 static void newline(void) {
-  ssfn_dst.x = PADDING;
-  ssfn_dst.y += ssfn_src->height;
+  y += psf_font->height;
+  x = 0;
 }
 
 void kputchar(const char c) {
-  if (term_failed) {
-    return;
-  }
   if (c == '\n') {
     newline();
     return;
   }
-  ssfn_putc(c);
+  psf_putchar(c, &x, &y, fg, bg);
+  //x += 8;
+  //y += 1;
 }
 
-static void kputs(const char *c) {
+void kputs(const char *c) {
   while (*c != '\0') {
     kputchar(*c);
     c++;
@@ -81,8 +75,8 @@ void vprintf(char *format, va_list args) {
   char *ptr = format;
   while (*ptr) {
     if (*ptr == '%') {
-      char str[20] = {' '};
-      str[19] = '\0';
+      char str[40] = {' '};
+      str[39] = '\0';
       ptr++;
       switch (*ptr++) {
         case 's':
@@ -95,7 +89,7 @@ void vprintf(char *format, va_list args) {
           break;
 
         case 'u':
-          itoa(va_arg(args, uint64_t), str);
+          utoa(va_arg(args, uint64_t), str);
           kputs(str);
           break;
       }

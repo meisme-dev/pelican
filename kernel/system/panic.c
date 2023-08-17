@@ -2,18 +2,29 @@
 #include <string.h>
 #include <system/panic.h>
 
-void _panic(const char *file, size_t line, const char *msg) {
+void _panic(const char *file, size_t line, char *format, ...) {
+  va_list args;
+  uint8_t j = 0, e = 0;
   for (uint32_t i = 0; i < framebuffer->height * framebuffer->width; i++) {
-    ((uint32_t *)(framebuffer->address))[i] = 0xff0000;
+    ((uint32_t *)(framebuffer->address))[i] = 0x0;
   }
+  va_start(args, format);
   reset_pos();
-  puts("BEGIN KERNEL PANIC");
-  puts("--------------------------------");
-  printf("AT %s:%d:\n", file, line);
-  printf("%s\n", msg);
-  puts("--------------------------------");
-  puts("END KERNEL PANIC");
-  for (;;) {
-    asm __volatile__("cli");
+  printf("PANICKED AT %s:%d:\n", file, line);
+  vprintf(format, args);
+  va_end(args);
+  while (1) {
+    e++;
+    j++;
+    e += e == 0;
+    for (uint32_t i = 0; i < framebuffer->height * framebuffer->width; i++) {
+      if (((uint32_t *)(framebuffer->address))[i] != 0xffffff) {
+        ((uint32_t *)(framebuffer->address))[i] += ((j + i) % e) << 16;
+      }
+    }
+
+    for (uint32_t i = 0; i < 0x3ffffff; i++) {
+      __asm__ volatile("nop");
+    }
   }
 }

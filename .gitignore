@@ -1,3 +1,5 @@
 .cache/
 .vscode/
+toolchain/
+sysroot/
 build/
