@@ -1,5 +1,5 @@
-#include <video/framebuffer.h>
 #include <stddef.h>
+#include <video/framebuffer.h>
 
 static volatile struct limine_framebuffer_request request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST,

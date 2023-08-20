@@ -1,9 +1,9 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
+#include <arch/amd64/io/io.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <arch/amd64/io/io.h>
 
 #define COM1 0x3f8
 

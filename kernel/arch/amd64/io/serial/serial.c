@@ -1,5 +1,5 @@
-#include <video/terminal.h>
 #include "serial.h"
+#include <video/terminal.h>
 
 bool serial_init(uint16_t port) {
   outb(port + 1, 0x00);
