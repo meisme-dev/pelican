@@ -1,7 +1,7 @@
-#include <descriptors/idt.h>
-#include <device/display/log.h>
+#include "idt.h"
+#include <exception/panic.h>
 #include <stddef.h>
-#include <system/panic.h>
+#include <video/log.h>
 
 _idt_entry_t idt_entries[256] = {0};
 

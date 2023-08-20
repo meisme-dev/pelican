@@ -1,15 +1,15 @@
-#include <descriptors/gdt.h>
-#include <descriptors/idt.h>
-#include <device/display/framebuffer.h>
-#include <device/display/log.h>
-#include <device/display/terminal.h>
-#include <device/pci/pci.h>
-#include <device/pci/vendors.h>
-#include <device/serial/serial.h>
+#include <common/boot/gdt/gdt.h>
+#include <common/device/pci/pci.h>
+#include <common/device/pci/vendors.h>
+#include <common/exception/idt.h>
+#include <common/io/serial/serial.h>
+#include <exception/panic.h>
 #include <memory/pmm.h>
 #include <stdlib.h>
 #include <string.h>
-#include <system/panic.h>
+#include <video/framebuffer.h>
+#include <video/log.h>
+#include <video/terminal.h>
 
 typedef struct {
   _block_t *head;

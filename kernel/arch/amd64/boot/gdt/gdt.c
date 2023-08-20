@@ -1,6 +1,6 @@
-#include <descriptors/gdt.h>
-#include <device/display/log.h>
+#include "gdt.h"
 #include <string.h>
+#include <video/log.h>
 
 #define DESC_COUNT 8
 

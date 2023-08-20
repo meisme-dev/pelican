@@ -1,8 +1,4 @@
-#include <sys/io.h>
-
-#ifdef __arm__
-#error ARM IO not implemented
-#endif
+#include "io.h"
 
 uint32_t inl(uint16_t port) {
   uint32_t data;

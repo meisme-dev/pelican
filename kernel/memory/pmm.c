@@ -1,10 +1,10 @@
-#include <device/display/log.h>
-#include <device/display/terminal.h>
-#include <device/serial/serial.h>
+#include <common/io/serial/serial.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
 #include <stdlib.h>
 #include <string.h>
+#include <video/log.h>
+#include <video/terminal.h>
 
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
 

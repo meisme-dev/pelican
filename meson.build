@@ -14,7 +14,7 @@ sources = [
   libk_sources
 ]
 
-include_directories = include_directories('libk/include', 'kernel/include', 'vendor')
+include_directories = include_directories('libk', 'kernel', 'vendor')
 
 regular_font_lib = static_library('regular_font', regular_font_target)
 regular_font_dep = declare_dependency(link_with: regular_font_lib)
