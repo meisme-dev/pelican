@@ -10,13 +10,12 @@
 
 enum block_types {
   FREE,
-  USED,
-  RESERVED,
+  USED
 };
 
 typedef struct {
-  enum block_types block_type;
+  bool block_type;
 } _block_t;
 
-uint64_t pmm_get_blocks();
-void pmm_init(_block_t *blocks);
+_block_t *pmm_get_blocks(uint64_t *c);
+void pmm_init(_block_t *blocks, uint64_t count);

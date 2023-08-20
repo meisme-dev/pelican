@@ -1,0 +1,1 @@
+{ UseTab: Never, IndentWidth: 2, TabWidth: 2, AllowShortIfStatementsOnASingleLine: true, IndentCaseLabels: true, BreakBeforeBraces: Attach, ColumnLimit: 0 }

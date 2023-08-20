@@ -7,12 +7,14 @@ GCC_VERSION="13.2.0"
 BINUTILS_URL="https://ftp.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.xz"
 GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.xz"
 CORES=$(nproc)
-
-PREFIX="$(readlink -f toolchain)"
 TARGET=x86_64-elf
-HOST=x86_64-pc-linux-gnu
+PREFIX=$(readlink -f toolchain)
 
-export PATH="$PREFIX/binutils/bin:$PREFIX/gcc/bin:$PATH"
+if [ "$1" ]; then
+  TARGET=$1
+fi
+
+export PATH="$PREFIX/bin"
 
 if [ -e "toolchain/bin/$TARGET-gcc" ]; then 
   printf "Your toolchain is likely already built. Continue? (Y/n) "
@@ -44,7 +46,7 @@ echo Done
 echo Compiling binutils
 mkdir -p toolchain/binutils/build
 cd toolchain/binutils/build
-../binutils-$BINUTILS_VERSION/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
+../binutils-$BINUTILS_VERSION/configure --target="$TARGET" --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
 make
 make install
 cd ../../
@@ -62,7 +64,7 @@ MULTILIB_DIRNAMES += no-red-zone" \
 sed '/^x86_64-\*-elf\*).*/a\	tmake_file="\${tmake_file} i386/t-x86_64-elf"' gcc/config.gcc
 
 cd ../build
-../gcc-$GCC_VERSION/configure --target=$TARGET --host=$HOST --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers --disable-werror CXXFLAGS="-Wno-format-security"
+../gcc-$GCC_VERSION/configure --target="$TARGET" --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers --disable-werror CXXFLAGS="-Wno-format-security"
 make all-gcc -j"$CORES"
 make all-target-libgcc -j"$CORES"
 make install-gcc
@@ -71,4 +73,4 @@ cd ../../../
 echo Done
 
 echo Toolchain now built
-echo Make sure "$PREFIX/binutils/bin:$PREFIX/gcc/bin" is in your \$PATH
+echo Make sure "$PREFIX/bin" is in your \$PATH

@@ -1,13 +1,15 @@
 #include <device/display/framebuffer.h>
+#include <device/display/psf.h>
 #include <device/display/terminal.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <device/display/psf.h>
 
+#include <device/display/log.h>
 #include <stdarg.h>
 
-extern char _binary____assets_font_psf_start[];
+extern char _binary____assets_bold_psf_start[];
+extern char _binary____assets_regular_psf_start[];
 
 #define PADDING 0
 
@@ -16,15 +18,24 @@ struct limine_framebuffer *framebuffer;
 static uint32_t x = 0, y = 0, fg = 0xffffff, bg = 0;
 static _psf_font_t *psf_font;
 
-
 bool terminal_init(void) {
   framebuffer = framebuffer_create();
   if (framebuffer == NULL) {
     return false;
   }
-  psf_font = (_psf_font_t *)&_binary____assets_font_psf_start;
-  psf_init((_psf_font_t *)&_binary____assets_font_psf_start);
+  set_bold(true);
+  log(SUCCESS, "Initialized terminal");
   return true;
+}
+
+void set_bold(bool bold) {
+  if (bold) {
+    psf_font = (_psf_font_t *)&_binary____assets_bold_psf_start;
+    psf_init((_psf_font_t *)&_binary____assets_bold_psf_start);
+    return;
+  }
+  psf_font = (_psf_font_t *)&_binary____assets_regular_psf_start;
+  psf_init((_psf_font_t *)&_binary____assets_regular_psf_start);
 }
 
 void reset_pos(void) {
@@ -48,8 +59,8 @@ void kputchar(const char c) {
     return;
   }
   psf_putchar(c, &x, &y, fg, bg);
-  //x += 8;
-  //y += 1;
+  // x += 8;
+  // y += 1;
 }
 
 void kputs(const char *c) {

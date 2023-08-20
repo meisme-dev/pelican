@@ -19,32 +19,26 @@ typedef struct {
 static void kstart(_kernel_state_t state);
 
 void kinit(void) {
-  if (terminal_init()) {
-    log(SUCCESS, "Initialized Terminal");
+  if (!terminal_init() && !serial_init(COM1)) {
+    panic("Failed to initialize terminal and serial");
   }
-  
-  if (serial_init(COM1)) {
-    log(SUCCESS, "Initialized COM1");
-  }
-  
+
+  log_init(DEBUG);
+
   gdt_init();
-  log(SUCCESS, "Initialized GDT and TSS");
-  
+
   idt_init();
-  log(SUCCESS, "Initialized IDT");
 
-  uint64_t count = pmm_get_blocks();
-
-  if(count == 0) {
+  uint64_t count = 0;
+  _block_t *first_block = pmm_get_blocks(&count);
+  if ((void *)first_block == NULL) {
     panic("Failed to initialize PMM");
   }
 
-  _block_t blocks[count];
-  pmm_init(blocks);
-  log(SUCCESS, "Initialized PMM");
+  pmm_init(first_block, count);
 
   _kernel_state_t state;
-  state.head = blocks;
+  state.head = first_block;
   state.mem_list_count = count;
 
   kstart(state);
@@ -66,23 +60,19 @@ static void kstart(_kernel_state_t state) {
     }
   }
 
-  uint64_t free = 0, used = 0, reserved = 0;
-  log(INFO, "Memory: %u blocks", state.mem_list_count);
+  uint64_t free = 0, used = 0;
+  log(INFO, "Memory: %u bytes", state.mem_list_count * BLOCK_SIZE);
   for (uint64_t i = 0; i < state.mem_list_count; i++) {
     switch (state.head[i].block_type) {
       case FREE:
         free++;
         break;
       case USED:
-      //  log(ERROR, "This should never happen");
         used++;
-        break;
-      case RESERVED:
-        reserved++;
         break;
     }
   }
- // log(INFO, "Free: %u, Used: %u, Reserved: %u", free, used, reserved);
+  log(INFO, "Free: %u, Used: %u", free, used);
   __asm__ volatile("int $0x80");
   __asm__ volatile("hlt");
 }

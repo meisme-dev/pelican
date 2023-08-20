@@ -1,7 +1,6 @@
 with (import <nixpkgs> {});
 mkShell {
   buildInputs = [
-    cmake
     meson
     ninja
     gcc
@@ -13,6 +12,7 @@ mkShell {
     cloog
     xorriso
     qemu
+    clang-tools
   ];
   
   shellHook = ''

@@ -13,9 +13,8 @@ void psf_init(_psf_font_t *font) {
 void psf_putchar(uint16_t character, uint32_t *cx, uint32_t *cy, uint32_t fg, uint32_t bg) {
   uint32_t x = *cx, y = *cy;
   unsigned char *glyph = (unsigned char *)psf_font + psf_font->header_size + (character > 0 && character < psf_font->count ? character : 0) * psf_font->bpg;
-  for (uint32_t i = 0; i < psf_font->height; i++) {
-    for (uint32_t j = psf_font->width; j > 0; j--) {
-      x += 1;
+  for (uint32_t i = 0; i < psf_font->height; i++, y++) {
+    for (int j = psf_font->width; j >= 0; j--, x++) {
       if (bg != 0) {
         put_pixel(x, y, bg, framebuffer);
       }
@@ -24,11 +23,10 @@ void psf_putchar(uint16_t character, uint32_t *cx, uint32_t *cy, uint32_t fg, ui
       }
     }
     x = *cx;
-    y += 1;
-    if(*cx >= framebuffer->width) {
-      *cy += psf_font->height;
-      *cx = 0;
-    }
   }
   *cx += psf_font->width;
+  if (*cx >= framebuffer->width) {
+    *cy += psf_font->height;
+    *cx = 0;
+  }
 }
