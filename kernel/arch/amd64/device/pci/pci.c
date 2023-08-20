@@ -29,8 +29,8 @@ bool device_exists(_pci_device_t pci_info) {
 }
 
 uint16_t pci_enumerate_devices(_pci_device_t *pci_infos) {
-  uint16_t i = 0;
   _pci_device_t pci_info;
+  uint16_t i = 0;
   for (uint16_t bus = 0; bus < 256; bus++) {
     for (uint8_t device = 0; device < 32; device++) {
       for (uint8_t func = 0; func < 8; func++) {

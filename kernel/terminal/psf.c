@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <video/framebuffer.h>
-#include <video/psf.h>
-#include <video/terminal.h>
+#include "psf.h"
+#include <terminal/terminal.h>
 
 static _psf_font_t *psf_font;
 

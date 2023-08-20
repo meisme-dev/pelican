@@ -1,7 +1,7 @@
 #include "idt.h"
 #include <exception/panic.h>
 #include <stddef.h>
-#include <video/log.h>
+#include <terminal/log.h>
 
 _idt_entry_t idt_entries[256] = {0};
 

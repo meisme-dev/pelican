@@ -7,9 +7,9 @@
 #include <memory/pmm.h>
 #include <stdlib.h>
 #include <string.h>
+#include <terminal/log.h>
+#include <terminal/terminal.h>
 #include <video/framebuffer.h>
-#include <video/log.h>
-#include <video/terminal.h>
 
 typedef struct {
   _block_t *head;
@@ -24,9 +24,7 @@ void kinit(void) {
   }
 
   log_init(DEBUG);
-
   gdt_init();
-
   idt_init();
 
   uint64_t count = 0;
@@ -72,7 +70,7 @@ static void kstart(_kernel_state_t state) {
         break;
     }
   }
-  log(INFO, "Free: %u, Used: %u", free, used);
+  log(INFO, "Free: %u, Used: %u", free * BLOCK_SIZE, used * BLOCK_SIZE);
   __asm__ volatile("int $0x80");
   __asm__ volatile("hlt");
 }

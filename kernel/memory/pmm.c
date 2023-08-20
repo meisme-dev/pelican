@@ -3,8 +3,8 @@
 #include <memory/pmm.h>
 #include <stdlib.h>
 #include <string.h>
-#include <video/log.h>
-#include <video/terminal.h>
+#include <terminal/log.h>
+#include <terminal/terminal.h>
 
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
 

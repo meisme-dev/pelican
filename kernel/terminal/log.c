@@ -1,6 +1,6 @@
 #include <stdarg.h>
-#include <video/log.h>
-#include <video/terminal.h>
+#include <terminal/log.h>
+#include <terminal/terminal.h>
 
 #define LOG_LEVEL_INFO(log_level, color) \
   { log_level, "[" #log_level "] ", color }

@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <video/framebuffer.h>
-#include <video/psf.h>
-#include <video/terminal.h>
+#include <terminal/psf.h>
+#include <terminal/terminal.h>
 
 #include <stdarg.h>
-#include <video/log.h>
+#include <terminal/log.h>
 
 extern char _binary____assets_bold_psf_start[];
 extern char _binary____assets_regular_psf_start[];

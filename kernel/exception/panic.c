@@ -1,6 +1,6 @@
 #include "panic.h"
 #include <string.h>
-#include <video/terminal.h>
+#include <terminal/terminal.h>
 
 void _panic(const char *file, size_t line, char *format, ...) {
   va_list args;
