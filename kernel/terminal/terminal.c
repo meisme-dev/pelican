@@ -1,9 +1,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <video/framebuffer.h>
 #include <terminal/psf.h>
 #include <terminal/terminal.h>
+#include <video/framebuffer.h>
 
 #include <stdarg.h>
 #include <terminal/log.h>

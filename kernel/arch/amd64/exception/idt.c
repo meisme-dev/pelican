@@ -1,5 +1,5 @@
 #include "idt.h"
-#include <exception/panic.h>
+#include <common/exception/panic.h>
 #include <stddef.h>
 #include <terminal/log.h>
 

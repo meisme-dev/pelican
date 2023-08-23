@@ -2,8 +2,8 @@
 #include <common/device/pci/pci.h>
 #include <common/device/pci/vendors.h>
 #include <common/exception/idt.h>
+#include <common/exception/panic.h>
 #include <common/io/serial/serial.h>
-#include <exception/panic.h>
 #include <memory/pmm.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,19 +11,16 @@
 #include <terminal/terminal.h>
 #include <video/framebuffer.h>
 
-typedef struct {
-  _block_t *head;
-  uint64_t mem_list_count;
-} _kernel_state_t;
+#include "kernel.h"
 
 static void kstart(_kernel_state_t state);
 
 void kinit(void) {
   if (!terminal_init() && !serial_init(COM1)) {
-    panic("Failed to initialize terminal and serial");
+    asm volatile("hlt");
   }
 
-  log_init(DEBUG);
+  log_init(LOGLEVEL);
   gdt_init();
   idt_init();
 
@@ -71,6 +68,6 @@ static void kstart(_kernel_state_t state) {
     }
   }
   log(INFO, "Free: %u, Used: %u", free * BLOCK_SIZE, used * BLOCK_SIZE);
-  __asm__ volatile("int $0x80");
-  __asm__ volatile("hlt");
+  asm volatile("int $0x80");
+  asm volatile("hlt");
 }
