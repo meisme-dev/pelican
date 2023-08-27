@@ -21,10 +21,4 @@ void kinit() {
     panic("Failed to initialize PMM");
   }
   pmm_init(first_block, count);
-
-  _kernel_state_t state;
-  state.head = first_block;
-  state.mem_list_count = count;
-
-  kstart(state);
 }

@@ -15,14 +15,6 @@ _block_t *pmm_get_blocks(uint64_t *c) {
 
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
-    switch (request.response->entries[i]->type) {
-      case LIMINE_MEMMAP_USABLE:
-        log(DEBUG, "Usable: base: %u length: %u", current_entry->base / BLOCK_SIZE, current_entry->length / BLOCK_SIZE);
-        break;
-      default:
-        log(DEBUG, "Reserved: base: %u length: %u", current_entry->base / BLOCK_SIZE, current_entry->length / BLOCK_SIZE);
-        break;
-    }
     *c += (current_entry->length) / BLOCK_SIZE;
   }
 

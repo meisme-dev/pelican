@@ -6,10 +6,3 @@
 #ifndef LOGLEVEL
 #define LOGLEVEL DEBUG
 #endif
-
-typedef struct {
-  _block_t *head;
-  uint64_t mem_list_count;
-} _kernel_state_t;
-
-void kstart(_kernel_state_t state);

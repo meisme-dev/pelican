@@ -86,8 +86,8 @@ void vprintf(char *format, va_list args) {
   char *ptr = format;
   while (*ptr) {
     if (*ptr == '%') {
-      char str[40] = {' '};
-      str[39] = '\0';
+      char str[65] = {' '};
+      str[64] = '\0';
       ptr++;
       switch (*ptr++) {
         case 's':
@@ -106,6 +106,11 @@ void vprintf(char *format, va_list args) {
 
         case 'x':
           utoa(va_arg(args, uint64_t), str, 16);
+          kputs(str);
+          break;
+
+        case 'b':
+          utoa(va_arg(args, uint64_t), str, 2);
           kputs(str);
           break;
       }
