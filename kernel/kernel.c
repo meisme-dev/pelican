@@ -1,45 +1,15 @@
-#include <common/boot/gdt/gdt.h>
+#include "kernel.h"
+#include <common/boot/init.h>
 #include <common/device/pci/pci.h>
 #include <common/device/pci/vendors.h>
-#include <common/exception/idt.h>
-#include <common/exception/panic.h>
-#include <common/io/serial/serial.h>
-#include <memory/pmm.h>
-#include <stdlib.h>
-#include <string.h>
 #include <terminal/log.h>
 #include <terminal/terminal.h>
-#include <video/framebuffer.h>
 
-#include "kernel.h"
-
-static void kstart(_kernel_state_t state);
-
-void kinit(void) {
-  if (!terminal_init() && !serial_init(COM1)) {
-    asm volatile("hlt");
-  }
-
-  log_init(LOGLEVEL);
-  gdt_init();
-  idt_init();
-
-  uint64_t count = 0;
-  _block_t *first_block = pmm_get_blocks(&count);
-  if ((void *)first_block == NULL) {
-    panic("Failed to initialize PMM");
-  }
-
-  pmm_init(first_block, count);
-
-  _kernel_state_t state;
-  state.head = first_block;
-  state.mem_list_count = count;
-
-  kstart(state);
+void kmain(void) {
+  kinit();
 }
 
-static void kstart(_kernel_state_t state) {
+void kstart(_kernel_state_t state) {
   _pci_device_t pci_devices[32];
   uint32_t pci_ids[32];
   uint16_t pci_count = pci_enumerate_devices(pci_devices);
@@ -69,5 +39,8 @@ static void kstart(_kernel_state_t state) {
   }
   log(INFO, "Free: %u, Used: %u", free * BLOCK_SIZE, used * BLOCK_SIZE);
   asm volatile("int $0x80");
-  asm volatile("hlt");
+  while (1) {
+    asm volatile("cli");
+    asm volatile("hlt");
+  }
 }

@@ -14,7 +14,7 @@ if [ "$1" ]; then
   TARGET=$1
 fi
 
-export PATH="$PREFIX/bin"
+export PATH="$PREFIX/bin:$PATH"
 
 if [ -e "toolchain/bin/$TARGET-gcc" ]; then 
   printf "Your toolchain is likely already built. Continue? (Y/n) "

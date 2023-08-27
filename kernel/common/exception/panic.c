@@ -10,7 +10,7 @@ void _panic(const char *file, size_t line, char *format, ...) {
   }
   va_start(args, format);
   reset_pos();
-  printf("PANICKED AT %s:%d:\n", file, line);
+  printf("KERNEL PANIC AT %s:%d:\n", file, line);
   vprintf(format, args);
   va_end(args);
   while (1) {
@@ -24,7 +24,7 @@ void _panic(const char *file, size_t line, char *format, ...) {
     }
 
     for (uint32_t i = 0; i < 0x3ffffff; i++) {
-      asm volatile("nop");
+      asm volatile("cli");
     }
   }
 }

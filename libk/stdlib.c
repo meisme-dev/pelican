@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void itoa(int64_t x, char *str) {
+void itoa(int64_t x, char *str, uint32_t base) {
   size_t i = 0;
   int8_t mult = 1;
   str[0] = '0';
@@ -13,8 +13,8 @@ void itoa(int64_t x, char *str) {
   }
 
   while (x != 0) {
-    str[i] = (char)(x * mult % 10 + 48);
-    x /= 10;
+    str[i] = x % base < 10 ? (char)((x * mult) % base + 48) : (char)((x * mult) % base + 55);
+    x /= base;
     i++;
   }
 
@@ -25,13 +25,13 @@ void itoa(int64_t x, char *str) {
   }
 }
 
-void utoa(uint64_t x, char *str) {
+void utoa(uint64_t x, char *str, uint32_t base) {
   size_t i = 0;
   str[0] = '0';
 
   while (x != 0) {
-    str[i] = (char)(x % 10 + 48);
-    x /= 10;
+    str[i] = x % base < 10 ? (char)(x % base + 48) : (char)(x % base + 55);
+    x /= base;
     i++;
   }
 

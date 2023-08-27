@@ -13,7 +13,7 @@ void psf_putchar(uint16_t character, uint32_t *cx, uint32_t *cy, uint32_t fg, ui
   uint32_t x = *cx, y = *cy;
   unsigned char *glyph = (unsigned char *)psf_font + psf_font->header_size + (character > 0 && character < psf_font->count ? character : 0) * psf_font->bpg;
   for (uint32_t i = 0; i < psf_font->height; i++, y++) {
-    for (int j = psf_font->width; j >= 0; j--, x++) {
+    for (uint32_t j = psf_font->width; j--; x++) {
       if ((glyph[i] >> j) & 1) {
         put_pixel(x, y, fg, framebuffer);
       } else if (bg != 0) {

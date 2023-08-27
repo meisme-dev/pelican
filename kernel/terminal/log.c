@@ -32,7 +32,7 @@ void log(_log_level_t log_level, char *format, ...) {
   if (log_level < level) {
     return;
   }
-  for (uint32_t i = 0; i < sizeof(infos) / sizeof(struct log_level_info); i++) {
+  for (int32_t i = sizeof(infos) / sizeof(struct log_level_info); i--;) {
     if (infos[i].log_level == log_level) {
       set_col(0x0, infos[i].color);
       kputs(infos[i].name);

@@ -12,7 +12,7 @@ void interrupt(uint16_t interrupt, uint64_t cr2) {
       panic("ALIGNMENT CHECK");
       break;
     case EXC_PAGE_FAULT:
-      panic("PAGE FAULT:\n    ADDRESS: %u\n    P: %u, W: %u, U: %u, R: %u I: %u, PK: %u, SS: %u", cr2,
+      panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    P: %u, W: %u, U: %u, R: %u I: %u, PK: %u, SS: %u", cr2,
             error & 0x1, error >> 1 & 0x1, error >> 2 & 0x1, error >> 3 & 0x1, error >> 4 & 0x1,
             error >> 5 & 0x1, error >> 6 & 0x1);
       break;
@@ -67,5 +67,5 @@ void idt_init(void) {
   idt_set(&idt_entries[EXC_SECURITY], interrupt_handler_addr(0x1E));
   idt_set(&idt_entries[EXC_SYSCALL], interrupt_handler_addr(0x80));
   idt_load(sizeof(idt_entries) - 1, (uint64_t)&idt_entries);
-  log(SUCCESS, "Loaded IDT at %u", (uint64_t)&idt_entries);
+  log(SUCCESS, "Loaded IDT at 0x%x", (uint64_t)&idt_entries);
 }

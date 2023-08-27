@@ -95,12 +95,17 @@ void vprintf(char *format, va_list args) {
           break;
 
         case 'd':
-          itoa(va_arg(args, int64_t), str);
+          itoa(va_arg(args, int64_t), str, 10);
           kputs(str);
           break;
 
         case 'u':
-          utoa(va_arg(args, uint64_t), str);
+          utoa(va_arg(args, uint64_t), str, 10);
+          kputs(str);
+          break;
+
+        case 'x':
+          utoa(va_arg(args, uint64_t), str, 16);
           kputs(str);
           break;
       }
