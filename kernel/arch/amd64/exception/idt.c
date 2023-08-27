@@ -12,9 +12,7 @@ void interrupt(uint16_t interrupt, uint64_t cr2) {
       panic("ALIGNMENT CHECK");
       break;
     case EXC_PAGE_FAULT:
-      panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    P: %u, W: %u, U: %u, R: %u I: %u, PK: %u, SS: %u", cr2,
-            error & 0x1, error >> 1 & 0x1, error >> 2 & 0x1, error >> 3 & 0x1, error >> 4 & 0x1,
-            error >> 5 & 0x1, error >> 6 & 0x1);
+      panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    ERROR: 0b%b", cr2, error & 0xff);
       break;
     case EXC_SYSCALL:
       log(DEBUG, "Recieved a system call");

@@ -8,29 +8,6 @@ idtr:
   .long 0
 
 .section .text
-.global idt_load
-.type idt_load, @function
-
-idt_load:
-  cli
-  mov idtr, di
-  mov idtr+2, rsi
-  lidt idtr
-  sti
-  ret
-
-.global exc_get_error
-.type exc_get_error, @function
-exc_get_error:
-  pop rax
-  push rax
-  ret
-
-.global exc_get_cr2
-.type exc_get_cr2, @function
-exc_get_cr2:
-  mov rax, cr2
-  ret
 
 .macro pushaq
   push rax
@@ -68,6 +45,32 @@ exc_get_cr2:
   pop rax
 .endm
 
+.global idt_load
+.type idt_load, @function
+
+idt_load:
+  cli
+  mov idtr, di
+  mov idtr+2, rsi
+  lidt idtr
+  sti
+  ret
+
+.global exc_get_error
+.type exc_get_error, @function
+
+exc_get_error:
+  pop rax
+  push rax
+  ret
+
+.global exc_get_cr2
+.type exc_get_cr2, @function
+
+exc_get_cr2:
+  mov rax, cr2
+  ret
+
 .macro interrupt_handler x
 .global interrupt_\x
 .type interrupt_\x, @function
@@ -82,21 +85,21 @@ interrupt_\x:
   iretq
 .endm
 
-interrupt_handler 0x0 # EXC_DIVISION
-interrupt_handler 0x1 # EXC_DEBUG
-interrupt_handler 0x2 # EXC_NM_INTERRUPT
-interrupt_handler 0x3 # EXC_BREAKPOINT
-interrupt_handler 0x4 # EXC_OVERFLOW
-interrupt_handler 0x5 # EXC_RANGE_EXCEEDED
-interrupt_handler 0x6 # EXC_INVALID_OPCODE
-interrupt_handler 0x7 # EXC_DEVICE_NOT_AVAILABLE
-interrupt_handler 0x8 # EXC_DOUBLE_FAULT
-interrupt_handler 0x9 # EXC_SEGMENT_OVERRUN
-interrupt_handler 0xA # EXC_INVALID_TSS
-interrupt_handler 0xB # EXC_SEG_NOT_PRESENT
-interrupt_handler 0xC # EXC_SEG_FAULT_STACK
-interrupt_handler 0xD # EXC_GP_FAULT
-interrupt_handler 0xE # EXC_PAGE_FAULT
+interrupt_handler 0x0  # EXC_DIVISION
+interrupt_handler 0x1  # EXC_DEBUG
+interrupt_handler 0x2  # EXC_NM_INTERRUPT
+interrupt_handler 0x3  # EXC_BREAKPOINT
+interrupt_handler 0x4  # EXC_OVERFLOW
+interrupt_handler 0x5  # EXC_RANGE_EXCEEDED
+interrupt_handler 0x6  # EXC_INVALID_OPCODE
+interrupt_handler 0x7  # EXC_DEVICE_NOT_AVAILABLE
+interrupt_handler 0x8  # EXC_DOUBLE_FAULT
+interrupt_handler 0x9  # EXC_SEGMENT_OVERRUN
+interrupt_handler 0xA  # EXC_INVALID_TSS
+interrupt_handler 0xB  # EXC_SEG_NOT_PRESENT
+interrupt_handler 0xC  # EXC_SEG_FAULT_STACK
+interrupt_handler 0xD  # EXC_GP_FAULT
+interrupt_handler 0xE  # EXC_PAGE_FAULT
 interrupt_handler 0x10 # EXC_FLOATING_POINT
 interrupt_handler 0x11 # EXC_ALIGNMENT_CHECK
 interrupt_handler 0x12 # EXC_MACHINE_CHECK 

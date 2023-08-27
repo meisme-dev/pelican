@@ -23,7 +23,7 @@ void _panic(const char *file, size_t line, char *format, ...) {
       }
     }
 
-    for (uint32_t i = 0; i < 0x3ffffff; i++) {
+    for (uint32_t i = 0; i < 0xffffff; i++) {
       asm volatile("cli");
     }
   }

@@ -7,7 +7,6 @@
 
 void kmain(void) {
   kinit();
-  log(VERBOSE, "%b", 0xfff);
   asm volatile("int $0x80");
   while (1) {
     asm volatile("cli");
