@@ -11,9 +11,12 @@ enum block_types {
   USED
 };
 
-typedef struct {
-  bool block_type;
-} _block_t;
+typedef struct page_header_t {
+  enum block_types block_type;
+  uint64_t base;
+  struct page_header_t *next;
+} page_header_t __attribute__((aligned(BLOCK_SIZE)));
 
-_block_t *pmm_get_blocks(uint64_t *c);
-void pmm_init(_block_t *blocks, uint64_t count);
+page_header_t *pmm_init();
+page_header_t *pmm_alloc_block();
+void pmm_free_block(page_header_t *header);
