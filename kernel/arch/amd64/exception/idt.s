@@ -71,6 +71,13 @@ exc_get_cr2:
   mov rax, cr2
   ret
 
+.global exc_get_rip
+.type exc_get_rip, @function
+
+exc_get_rip:
+  mov rax, qword ptr [rsp + 4]
+  ret
+
 .macro interrupt_handler x
 .global interrupt_\x
 .type interrupt_\x, @function

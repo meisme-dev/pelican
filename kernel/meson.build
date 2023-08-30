@@ -7,5 +7,6 @@ kernel_sources = files([
   'terminal/log.c',
   'terminal/psf.c',
   'common/exception/panic.c',
+  'sync/lock.c',
   'memory/pmm.c',
 ]) + arch_sources

@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <sync/lock.h>
 #include <video/framebuffer.h>
 
 static volatile struct limine_framebuffer_request request = {

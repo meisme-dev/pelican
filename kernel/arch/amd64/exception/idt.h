@@ -78,3 +78,4 @@ void idt_load(uint16_t limit, uint64_t offset);
 
 uint64_t exc_get_error();
 uint64_t exc_get_cr2();
+uint64_t exc_get_rip();

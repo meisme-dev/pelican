@@ -9,7 +9,7 @@
 
 void kmain(void) {
   kinit();
-  if (!pmm_init()) {
+  if (!(pmm_init())) {
     panic("FAILED TO INTIALIZE PHYSICAL MEMORY MANAGER");
   }
   page_header_t *header;

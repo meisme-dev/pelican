@@ -1,4 +1,5 @@
 #include <arch/amd64/boot/gdt/gdt.h>
+#include <arch/amd64/cpu/cpu.h>
 #include <arch/amd64/exception/idt.h>
 #include <arch/amd64/io/serial/serial.h>
 #include <common/exception/panic.h>
@@ -15,4 +16,5 @@ void kinit() {
   log_init(LOGLEVEL);
   gdt_init();
   idt_init();
+  cpu_init();
 }

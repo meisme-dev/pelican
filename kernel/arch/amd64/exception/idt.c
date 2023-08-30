@@ -65,5 +65,5 @@ void idt_init(void) {
   idt_set(&idt_entries[EXC_SECURITY], interrupt_handler_addr(0x1E));
   idt_set(&idt_entries[EXC_SYSCALL], interrupt_handler_addr(0x80));
   idt_load(sizeof(idt_entries) - 1, (uint64_t)&idt_entries);
-  log(SUCCESS, "Loaded IDT at 0x%x", (uint64_t)&idt_entries);
+  // log(SUCCESS, "Loaded IDT at 0x%x", (uint64_t)&idt_entries);
 }

@@ -1,12 +1,12 @@
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sync/lock.h>
+#include <terminal/log.h>
 #include <terminal/psf.h>
 #include <terminal/terminal.h>
 #include <video/framebuffer.h>
-
-#include <stdarg.h>
-#include <terminal/log.h>
 
 extern char _binary____assets_bold_psf_start[];
 extern char _binary____assets_regular_psf_start[];

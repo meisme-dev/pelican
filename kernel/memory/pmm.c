@@ -9,38 +9,38 @@
 
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
 
-static page_header_t *page_head = 0x0;
+static page_header_t *page_head = NULL;
 
 static void pmm_allocate_list() {
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
-    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < sizeof(page_header_t) + BLOCK_SIZE) {
+
+    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (sizeof(page_header_t) * 2) + BLOCK_SIZE) {
       continue;
     }
 
-    if (page_head == NULL) {
-      page_head = (page_header_t *)(current_entry->base);
-      memset(page_head, 0, sizeof(page_header_t));
-    }
-
     page_header_t *entry_page_head = (page_header_t *)current_entry->base;
+    memset(entry_page_head, 0, sizeof(page_header_t));
+    memset(&entry_page_head[1], 0, sizeof(page_header_t));
 
-    if (page_head->next == NULL) {
+    if (page_head == NULL) {
+      page_head = entry_page_head;
       page_head->next = &entry_page_head[1];
     }
 
     page_header_t *current_page_header = page_head;
 
-    while (current_page_header->next) {
-      current_page_header = (page_header_t *)current_page_header->next;
+    while (current_page_header->next != NULL && (uint64_t)current_page_header->next < current_entry->base + current_entry->length) {
+      current_page_header = current_page_header->next;
     }
+
     for (uint64_t j = 0; j < current_entry->length / BLOCK_SIZE; j++) {
       page_header_t *new_page_header = &entry_page_head[j];
+      memset(new_page_header, 0, sizeof(page_header_t));
       new_page_header->base = current_entry->base + (j * BLOCK_SIZE);
-
       current_page_header->base = current_entry->base + (j * BLOCK_SIZE);
       current_page_header->next = new_page_header;
-      current_page_header->block_type = FREE;
+      current_page_header->block_type = current_page_header->base < current_entry->base + (sizeof(page_header_t) * 2) ? USED : FREE;
     }
   }
 }
