@@ -1,4 +1,5 @@
 #pragma once
+#include <stdatomic.h>
 
-void lock();
-void unlock();
+void acquire(atomic_flag *flag);
+void release(atomic_flag *flag);

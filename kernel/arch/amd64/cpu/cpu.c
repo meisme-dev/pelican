@@ -1,33 +1,56 @@
-#include <limine/limine.h>
-#include <terminal/log.h>
-#include <sync/lock.h>
-#include <arch/amd64/exception/idt.h>
 #include <arch/amd64/boot/gdt/gdt.h>
+#include <arch/amd64/exception/idt.h>
+#include <common/cpu/cpu.h>
+#include <limine/limine.h>
+#include <sync/lock.h>
+#include <terminal/log.h>
 
-static volatile struct limine_smp_request request = {
+volatile struct limine_smp_request smp_request = {
     .id = LIMINE_SMP_REQUEST,
+    .revision = 0,
     .flags = 1,
-    .revision = 0};
+};
 
-static void core_init(struct limine_smp_info *info) {
-  lock();
-  gdt_init();
-  idt_init();
-  log(SUCCESS, "CPU %u initialized", info->processor_id);
-  unlock();
-  while(1) {
+inline static void halt() {
+  while (1) {
+    static atomic_flag lock = ATOMIC_FLAG_INIT;
+    acquire(&lock);
     asm volatile("cli");
     asm volatile("hlt");
+    release(&lock);
   }
+}
+
+static void core_init(struct limine_smp_info *info) {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
+  gdt_init();
+  idt_init();
+  release(&lock);
+  log(SUCCESS, "CPU %u initialized", info->processor_id);
+  if (info->lapic_id == 0) {
+    return;
+  }
+  halt();
 }
 
 struct limine_smp_response *cpu_init() {
-  for(uint64_t i = 0; i < 16; i++) {
-    if(request.response->cpus[i]->lapic_id == request.response->bsp_lapic_id) {
+  for (uint64_t i = 0; i < smp_request.response->cpu_count; i++) {
+    if (smp_request.response->cpus[i]->lapic_id == smp_request.response->bsp_lapic_id) {
+      core_init(smp_request.response->cpus[i]);
       continue;
     }
-    request.response->cpus[i]->goto_address = core_init;
+    smp_request.response->cpus[i]->goto_address = core_init;
   }
-  return request.response;
+  return smp_request.response;
 }
 
+void cpu_halt() {
+  for (uint64_t i = 0; i < smp_request.response->cpu_count; i++) {
+    if (smp_request.response->cpus[i]->lapic_id == smp_request.response->bsp_lapic_id) {
+      continue;
+    }
+    smp_request.response->cpus[i]->goto_address = halt;
+  }
+  halt();
+}

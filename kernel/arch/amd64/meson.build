@@ -1,6 +1,6 @@
 arch_sources = files([
-  'boot/init.c',
   'cpu/cpu.c',
+  'cpu/cpu.s',
   'boot/gdt/gdt.s',
   'exception/idt.s',
   'boot/gdt/gdt.c',

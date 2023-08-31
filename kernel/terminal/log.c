@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <sync/lock.h>
 #include <terminal/log.h>
 #include <terminal/terminal.h>
 
@@ -27,6 +28,8 @@ void log_init(uint8_t log_level) {
 }
 
 void log(_log_level_t log_level, char *format, ...) {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
   va_list args;
   va_start(args, format);
   if (log_level < level) {
@@ -42,6 +45,7 @@ void log(_log_level_t log_level, char *format, ...) {
   vprintf(format, args);
   puts("");
   va_end(args);
+  release(&lock);
 }
 
 #undef LOG_LEVEL_INFO
