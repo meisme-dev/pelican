@@ -16,4 +16,4 @@ xorriso -as mkisofs -b limine-bios-cd.bin \
 --efi-boot-part --efi-boot-image --protective-msdos-label \
 sysroot -o sysroot/pelican.iso
 
-vendor/limine/limine-deploy sysroot/pelican.iso
+vendor/limine/limine bios-install sysroot/pelican.iso
