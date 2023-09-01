@@ -16,7 +16,7 @@ static void pmm_allocate_list() {
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
 
-    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (sizeof(page_header_t) * 2) + BLOCK_SIZE) {
+    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (sizeof(page_header_t) * 2) + PAGE_SIZE) {
       continue;
     }
 
@@ -35,27 +35,27 @@ static void pmm_allocate_list() {
       current_page_header = current_page_header->next;
     }
 
-    for (uint64_t j = 0; j < current_entry->length / BLOCK_SIZE; j++) {
+    for (uint64_t j = 0; j < current_entry->length / PAGE_SIZE; j++) {
       page_header_t *new_page_header = &entry_page_head[j];
       memset(new_page_header, 0, sizeof(page_header_t));
-      new_page_header->base = current_entry->base + (j * BLOCK_SIZE);
-      current_page_header->base = current_entry->base + (j * BLOCK_SIZE);
+      new_page_header->base = current_entry->base + (j * PAGE_SIZE);
+      current_page_header->base = current_entry->base + (j * PAGE_SIZE);
       current_page_header->next = new_page_header;
-      current_page_header->block_type = current_page_header->base < current_entry->base + (sizeof(page_header_t) * 2) ? USED : FREE;
+      current_page_header->page_type = current_page_header->base < current_entry->base + (sizeof(page_header_t) * 2) ? USED : FREE;
     }
   }
 }
 
-page_header_t *pmm_alloc_block() {
+page_header_t *pmm_alloc_page() {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
   page_header_t *current_page = page_head;
   while (current_page->next) {
     current_page = current_page->next;
-    if (current_page->block_type == USED) {
+    if (current_page->page_type == USED) {
       continue;
     }
-    current_page->block_type = USED;
+    current_page->page_type = USED;
     release(&lock);
     return current_page;
   }
@@ -63,13 +63,13 @@ page_header_t *pmm_alloc_block() {
   return NULL;
 }
 
-void pmm_free_block(page_header_t *header) {
+void pmm_free_page(page_header_t *header) {
   if (header == NULL) {
     return;
   }
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
-  header->block_type = FREE;
+  header->page_type = FREE;
   release(&lock);
 }
 
