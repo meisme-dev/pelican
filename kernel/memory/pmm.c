@@ -4,6 +4,7 @@
 #include <memory/pmm.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sync/lock.h>
 #include <terminal/log.h>
 #include <terminal/terminal.h>
 
@@ -46,6 +47,8 @@ static void pmm_allocate_list() {
 }
 
 page_header_t *pmm_alloc_block() {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
   page_header_t *current_page = page_head;
   while (current_page->next) {
     current_page = current_page->next;
@@ -53,8 +56,10 @@ page_header_t *pmm_alloc_block() {
       continue;
     }
     current_page->block_type = USED;
+    release(&lock);
     return current_page;
   }
+  release(&lock);
   return NULL;
 }
 
@@ -62,7 +67,10 @@ void pmm_free_block(page_header_t *header) {
   if (header == NULL) {
     return;
   }
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
   header->block_type = FREE;
+  release(&lock);
 }
 
 page_header_t *pmm_init() {
