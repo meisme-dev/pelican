@@ -14,7 +14,6 @@ extern char _binary____assets_regular_psf_start[];
 #define PADDING 0
 
 struct limine_framebuffer *framebuffer;
-static atomic_flag global_lock = ATOMIC_FLAG_INIT;
 
 static uint32_t x = 0, y = 0, fg = 0xffffff, bg = 0;
 static _psf_font_t *psf_font;
@@ -43,7 +42,7 @@ void set_bold(bool bold) {
   release(&lock);
 }
 
-inline void reset_pos(void) {
+void reset_pos(void) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
   x = 0;
@@ -51,7 +50,7 @@ inline void reset_pos(void) {
   release(&lock);
 }
 
-inline void set_col(uint32_t nbg, uint32_t nfg) {
+void set_col(uint32_t nbg, uint32_t nfg) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
   bg = nbg;

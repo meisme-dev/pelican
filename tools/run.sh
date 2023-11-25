@@ -4,7 +4,6 @@ set -e
 
 tools/build.sh
 
-
 QEMU_BINARY="qemu-system-x86_64"
 EXTRA_ARGS=""
 ACCELERATORS="$(${QEMU_BINARY} -accel help)"
