@@ -12,9 +12,6 @@
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
 static page_descriptor_t *page_head = NULL;
 
-/* This is used by multiple functions, and will deadlock if the functions are nested */
-static volatile atomic_flag lock = ATOMIC_FLAG_INIT;
-
 static void pmm_allocate_list(void) {
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
@@ -61,6 +58,7 @@ static void pmm_allocate_list(void) {
 }
 
 page_descriptor_t *pmm_alloc_page(void) {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
   /* Take the next usable page, instead of taking page_head */
   page_descriptor_t *allocated_page = page_head->next;
@@ -81,6 +79,7 @@ page_descriptor_t *pmm_alloc_page(void) {
 }
 
 void pmm_free_page(page_descriptor_t *descriptor) {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
 
   /* Get the last entry in the free list */
