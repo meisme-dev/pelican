@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "memory/vmm.h"
 #include <common/cpu/cpu.h>
 #include <common/device/pci/pci.h>
 #include <common/device/pci/vendors.h>
@@ -14,6 +15,16 @@ void kmain(void) {
   cpu_init();
   if (!(pmm_init())) {
     panic("FAILED TO INTIALIZE PHYSICAL MEMORY MANAGER");
+  }
+  page_header_t *test = vmm_alloc_mem(8192);
+  if (!test) {
+    panic("null");
+  }
+  page_header_t *current = test;
+
+  while (current->next) {
+    printf("%x", current->base);
+    current = current->next;
   }
   asm volatile("int $0x80");
   cpu_halt();

@@ -9,4 +9,5 @@ kernel_sources = files([
   'common/exception/panic.c',
   'sync/lock.c',
   'memory/pmm.c',
+  'memory/vmm.c',
 ]) + arch_sources

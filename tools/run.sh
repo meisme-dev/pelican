@@ -24,6 +24,7 @@ fi
 QEMU_ARGS="-d int \
            -cdrom sysroot/pelican.iso \
            -M smm=off \
+           -m 256m \
            -smp $(nproc) \
            $EXTRA_ARGS \
            --no-reboot" 

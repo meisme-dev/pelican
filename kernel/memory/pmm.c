@@ -2,6 +2,7 @@
 #include <common/io/serial/serial.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sync/lock.h>
@@ -9,71 +10,93 @@
 #include <terminal/terminal.h>
 
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
+static page_descriptor_t *page_head = NULL;
 
-static page_header_t *page_head = NULL;
+/* This is used by multiple functions, and will deadlock if the functions are nested */
+static volatile atomic_flag lock = ATOMIC_FLAG_INIT;
 
-static void pmm_allocate_list() {
+static void pmm_allocate_list(void) {
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
 
-    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (sizeof(page_header_t) * 2) + PAGE_SIZE) {
+    /* If the current entry is not usable, or not large enough, skip */
+    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (sizeof(page_descriptor_t) * 2) + PAGE_SIZE) {
       continue;
     }
 
-    page_header_t *entry_page_head = (page_header_t *)current_entry->base;
-    memset(entry_page_head, 0, sizeof(page_header_t));
-    memset(&entry_page_head[1], 0, sizeof(page_header_t));
+    uint64_t descriptor_count = current_entry->length / PAGE_SIZE;
+    page_descriptor_t *entry_page_head = (page_descriptor_t *)current_entry->base;
 
+    /* Zero out the first 2 descriptors to prevent garbage data */
+    memset(entry_page_head, 0, sizeof(page_descriptor_t));
+    memset(&entry_page_head[1], 0, sizeof(page_descriptor_t));
+
+    /* If the current page descriptor is not initialized, set it to the first descriptor of this entry */
     if (page_head == NULL) {
       page_head = entry_page_head;
       page_head->next = &entry_page_head[1];
+      entry_page_head->prev = page_head;
     }
 
-    page_header_t *current_page_header = page_head;
+    page_descriptor_t *current_page_descriptor = page_head;
 
-    while (current_page_header->next != NULL && (uint64_t)current_page_header->next < current_entry->base + current_entry->length) {
-      current_page_header = current_page_header->next;
+    /* Get the last entry, and verify that it is not out of range */
+    while (current_page_descriptor->next != NULL && (uint64_t)current_page_descriptor->next < current_entry->base + current_entry->length) {
+      current_page_descriptor = current_page_descriptor->next;
     }
 
-    for (uint64_t j = 0; j < current_entry->length / PAGE_SIZE; j++) {
-      page_header_t *new_page_header = &entry_page_head[j];
-      memset(new_page_header, 0, sizeof(page_header_t));
-      new_page_header->base = current_entry->base + (j * PAGE_SIZE);
-      current_page_header->base = current_entry->base + (j * PAGE_SIZE);
-      current_page_header->next = new_page_header;
-      current_page_header->page_type = current_page_header->base < current_entry->base + (sizeof(page_header_t) * 2) ? USED : FREE;
+    for (uint64_t j = 0; j < descriptor_count; j++) {
+      page_descriptor_t *new_page_descriptor = &entry_page_head[j];
+      memset(new_page_descriptor, 0, sizeof(page_descriptor_t));
+
+      /* Take into account the page descriptor size when setting the base */
+      new_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + (sizeof(page_descriptor_t) * descriptor_count);
+      current_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + (sizeof(page_descriptor_t) * descriptor_count);
+
+      /* Insert the new page descriptor */
+      current_page_descriptor->next = new_page_descriptor;
+      new_page_descriptor->prev = current_page_descriptor;
     }
   }
 }
 
-page_header_t *pmm_alloc_page() {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
+page_descriptor_t *pmm_alloc_page(void) {
   acquire(&lock);
-  page_header_t *current_page = page_head;
-  while (current_page->next) {
-    current_page = current_page->next;
-    if (current_page->page_type == USED) {
-      continue;
-    }
-    current_page->page_type = USED;
+  /* Take the next usable page, instead of taking page_head */
+  page_descriptor_t *allocated_page = page_head->next;
+
+  if (allocated_page->next == NULL || allocated_page == NULL) {
+    /* Return as there is likely not enough free memory */
     release(&lock);
-    return current_page;
+    return NULL;
   }
+
+  /* Drop the descriptor from the free list, so that nothing else tries to allocate it */
+  page_head->next = allocated_page->next;
+  page_head->next->prev = page_head;
+  allocated_page->next = NULL;
+
   release(&lock);
-  return NULL;
+  return allocated_page;
 }
 
-void pmm_free_page(page_header_t *header) {
-  if (header == NULL) {
-    return;
-  }
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
+void pmm_free_page(page_descriptor_t *descriptor) {
   acquire(&lock);
-  header->page_type = FREE;
+
+  /* Get the last entry in the free list */
+  page_descriptor_t *current_page_descriptor = page_head;
+  while (current_page_descriptor->next != NULL) {
+    current_page_descriptor = current_page_descriptor->next;
+  }
+
+  /* Insert the descriptor */
+  current_page_descriptor->next = descriptor;
+  descriptor->prev = current_page_descriptor;
+  descriptor->next = NULL;
   release(&lock);
 }
 
-page_header_t *pmm_init() {
+page_descriptor_t *pmm_init(void) {
   pmm_allocate_list();
   log(SUCCESS, "Initialized PMM");
   return page_head;
