@@ -1,5 +1,5 @@
 #include "vmm.h"
-#include "memory/pmm.h"
+#include "pmm.h"
 #include "sync/lock.h"
 
 page_descriptor_t *vmm_alloc_mem(uint64_t size) {
