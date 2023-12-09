@@ -1,7 +1,7 @@
 #include <common/exception/panic.h>
 #include <common/io/serial/serial.h>
 #include <limine/limine.h>
-#include <memory/pmm.h>
+#include "pmm.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
