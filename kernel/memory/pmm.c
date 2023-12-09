@@ -1,7 +1,7 @@
+#include "pmm.h"
 #include <common/exception/panic.h>
 #include <common/io/serial/serial.h>
 #include <limine/limine.h>
-#include "pmm.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,7 +32,7 @@ static void pmm_allocate_list(void) {
     if (page_head == NULL) {
       page_head = entry_page_head;
       page_head->next = &entry_page_head[1];
-      entry_page_head->prev = page_head;
+      entry_page_head[1].prev = page_head;
     }
 
     page_descriptor_t *current_page_descriptor = page_head;
@@ -53,6 +53,7 @@ static void pmm_allocate_list(void) {
       /* Insert the new page descriptor */
       current_page_descriptor->next = new_page_descriptor;
       new_page_descriptor->prev = current_page_descriptor;
+      current_page_descriptor = new_page_descriptor;
     }
   }
 }
@@ -73,7 +74,7 @@ page_descriptor_t *pmm_alloc_page(void) {
   page_head->next = allocated_page->next;
   page_head->next->prev = page_head;
   allocated_page->next = NULL;
-
+  allocated_page->prev = NULL;
   release(&lock);
   return allocated_page;
 }
@@ -97,6 +98,11 @@ void pmm_free_page(page_descriptor_t *descriptor) {
 
 page_descriptor_t *pmm_init(void) {
   pmm_allocate_list();
+  page_descriptor_t *current_page = page_head;
+  while (current_page->next) {
+    current_page = current_page->next;
+    serial_send(COM1, '.');
+  }
   log(SUCCESS, "Initialized PMM");
   return page_head;
 }
