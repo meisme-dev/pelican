@@ -1,5 +1,4 @@
 #include "kernel.h"
-#include "memory/vmm.h"
 #include <common/cpu/cpu.h>
 #include <common/device/pci/pci.h>
 #include <common/device/pci/vendors.h>

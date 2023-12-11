@@ -1,9 +1,9 @@
 #include "idt.h"
 #include <common/exception/panic.h>
-#include <memory/vmm.h>
 #include <stddef.h>
-#include <string.h>
 #include <terminal/log.h>
+
+_idt_entry_t idt_entries[256] = {0};
 
 void interrupt(uint16_t interrupt, uint64_t cr2) {
   uint32_t error = exc_get_error() & 0xffffffff;
@@ -39,9 +39,6 @@ static void idt_set(_idt_entry_t *entry, uint64_t handler) {
 }
 
 void idt_init(void) {
-  page_descriptor_t *mem = vmm_alloc_mem(sizeof(_idt_entry_t) * 256);
-  _idt_entry_t *idt_entries = (void *)mem->base;
-  memset(idt_entries, 0, sizeof(_idt_entry_t) * 256);
   idt_set(&idt_entries[EXC_DIVISION], interrupt_handler_addr(0x0));
   idt_set(&idt_entries[EXC_DEBUG], interrupt_handler_addr(0x1));
   idt_set(&idt_entries[EXC_NM_INTERRUPT], interrupt_handler_addr(0x2));
@@ -67,6 +64,6 @@ void idt_init(void) {
   idt_set(&idt_entries[EXC_VMM_COMMUNICATION], interrupt_handler_addr(0x1D));
   idt_set(&idt_entries[EXC_SECURITY], interrupt_handler_addr(0x1E));
   idt_set(&idt_entries[EXC_SYSCALL], interrupt_handler_addr(0x80));
-  idt_load(sizeof(_idt_entry_t) * 256 - 1, (uint64_t)idt_entries);
+  idt_load(sizeof(idt_entries) - 1, (uint64_t)&idt_entries);
   // log(SUCCESS, "Loaded IDT at 0x%x", (uint64_t)&idt_entries);
 }
