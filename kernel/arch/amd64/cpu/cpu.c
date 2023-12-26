@@ -28,7 +28,7 @@ static void core_init(struct limine_smp_info *info) {
   idt_init();
   release(&lock);
   log(SUCCESS, "CPU %u initialized", info->processor_id);
-  if (info->lapic_id == 0) {
+  if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;
   }
   halt();
@@ -36,10 +36,12 @@ static void core_init(struct limine_smp_info *info) {
 
 struct limine_smp_response *cpu_init() {
   for (uint64_t i = 0; i < smp_request.response->cpu_count; i++) {
+    /* Main CPU does not support goto_address */
     if (smp_request.response->cpus[i]->lapic_id == smp_request.response->bsp_lapic_id) {
       core_init(smp_request.response->cpus[i]);
       continue;
     }
+    /* Load GDT and IDT */
     smp_request.response->cpus[i]->goto_address = core_init;
   }
   return smp_request.response;

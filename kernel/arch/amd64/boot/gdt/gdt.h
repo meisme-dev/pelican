@@ -28,7 +28,7 @@ typedef struct __attribute__((__packed__)) {
   uint8_t limit1 : 4;
   uint8_t flags : 4;
   uint8_t base2;
-} _gdt_entry_t;
+} gdt_entry_t;
 
 typedef struct __attribute__((__packed__)) {
   uint32_t reserved0;
@@ -46,7 +46,7 @@ typedef struct __attribute__((__packed__)) {
   uint64_t reserved2;
   uint16_t reserved3;
   uint16_t iopb;
-} _tss_t;
+} tss_t;
 
 typedef uint8_t gdt_descriptor[8];
 

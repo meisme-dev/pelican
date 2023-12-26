@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <terminal/log.h>
 
-_idt_entry_t idt_entries[256] = {0};
+idt_entry_t idt_entries[256] = {0};
 
 void interrupt(uint16_t interrupt, uint64_t cr2) {
   uint32_t error = exc_get_error() & 0xffffffff;
@@ -14,7 +14,7 @@ void interrupt(uint16_t interrupt, uint64_t cr2) {
     case EXC_PAGE_FAULT:
       panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    ERROR: 0b%b", cr2, error & 0xff);
       break;
-    case EXC_SYSCALL:
+    case INT_SYSCALL:
       log(DEBUG, "Recieved a system call");
       break;
     case EXC_GP_FAULT:
@@ -27,7 +27,7 @@ void interrupt(uint16_t interrupt, uint64_t cr2) {
   return;
 }
 
-static void idt_set(_idt_entry_t *entry, uint64_t handler) {
+static void idt_set(idt_entry_t *entry, uint64_t handler) {
   entry->offset0 = handler & 0xffff;
   entry->ss = 0x8;
   entry->ist = 0x0;
@@ -63,7 +63,7 @@ void idt_init(void) {
   idt_set(&idt_entries[EXC_HYPERVISOR_INJECT], interrupt_handler_addr(0x1C));
   idt_set(&idt_entries[EXC_VMM_COMMUNICATION], interrupt_handler_addr(0x1D));
   idt_set(&idt_entries[EXC_SECURITY], interrupt_handler_addr(0x1E));
-  idt_set(&idt_entries[EXC_SYSCALL], interrupt_handler_addr(0x80));
+  idt_set(&idt_entries[INT_SYSCALL], interrupt_handler_addr(0x80));
   idt_load(sizeof(idt_entries) - 1, (uint64_t)&idt_entries);
   // log(SUCCESS, "Loaded IDT at 0x%x", (uint64_t)&idt_entries);
 }

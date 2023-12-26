@@ -16,5 +16,7 @@ void kmain(void) {
   }
   cpu_init();
   asm volatile("int $0x80");
+  int *i = (void *)(0x50);
+  *i = 0;
   cpu_halt();
 }

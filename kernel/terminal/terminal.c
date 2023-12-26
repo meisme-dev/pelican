@@ -16,7 +16,7 @@ extern char _binary____assets_regular_psf_start[];
 struct limine_framebuffer *framebuffer;
 
 static uint32_t x = 0, y = 0, fg = 0xffffff, bg = 0;
-static _psf_font_t *psf_font;
+static psf_font_t *psf_font;
 
 bool terminal_init(void) {
   framebuffer = framebuffer_create();
@@ -32,13 +32,13 @@ void set_bold(bool bold) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
   if (bold) {
-    psf_font = (_psf_font_t *)&_binary____assets_bold_psf_start;
-    psf_init((_psf_font_t *)&_binary____assets_bold_psf_start);
+    psf_font = (psf_font_t *)&_binary____assets_bold_psf_start;
+    psf_init((psf_font_t *)&_binary____assets_bold_psf_start);
     release(&lock);
     return;
   }
-  psf_font = (_psf_font_t *)&_binary____assets_regular_psf_start;
-  psf_init((_psf_font_t *)&_binary____assets_regular_psf_start);
+  psf_font = (psf_font_t *)&_binary____assets_regular_psf_start;
+  psf_init((psf_font_t *)&_binary____assets_regular_psf_start);
   release(&lock);
 }
 

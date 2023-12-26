@@ -6,6 +6,7 @@ arch_sources = files([
   'boot/gdt/gdt.c',
   'exception/idt.c',
   'io/serial/serial.c',
+  'mem/paging.c',
   'io/io.c',
   'device/pci/pci.c',
 ])

@@ -5,35 +5,35 @@
 void interrupt(uint16_t interrupt, uint64_t cr2);
 
 #define interrupt_handler(x) \
-  extern void interrupt_##x();
+  extern void interrupt_##x()
 
 #define interrupt_handler_addr(x) (uint64_t) interrupt_##x
 
-interrupt_handler(0x0)      /* EXC_DIVISION */
-    interrupt_handler(0x1)  /* EXC_DEBUG */
-    interrupt_handler(0x2)  /* EXC_NM_INTERRUPT */
-    interrupt_handler(0x3)  /* EXC_BREAKPOINT */
-    interrupt_handler(0x4)  /* EXC_OVERFLOW */
-    interrupt_handler(0x5)  /* EXC_RANGE_EXCEEDED */
-    interrupt_handler(0x6)  /* EXC_INVALID_OPCODE */
-    interrupt_handler(0x7)  /* EXC_DEVICE_NOT_AVAILABLE */
-    interrupt_handler(0x8)  /* EXC_DOUBLE_FAULT */
-    interrupt_handler(0x9)  /* EXC_SEGMENT_OVERRUN */
-    interrupt_handler(0xA)  /* EXC_INVALID_TSS */
-    interrupt_handler(0xB)  /* EXC_SEG_NOT_PRESENT */
-    interrupt_handler(0xC)  /* EXC_SEG_FAULT_STACK */
-    interrupt_handler(0xD)  /* EXC_GP_FAULT */
-    interrupt_handler(0xE)  /* EXC_PAGE_FAULT */
-    interrupt_handler(0x10) /* EXC_FLOATING_POINT */
-    interrupt_handler(0x11) /* EXC_ALIGNMENT_CHECK */
-    interrupt_handler(0x12) /* EXC_MACHINE_CHECK */
-    interrupt_handler(0x13) /* EXC_SIMD */
-    interrupt_handler(0x14) /* EXC_VIRTUALIZATION */
-    interrupt_handler(0x15) /* EXC_CONTROL_PROTECTION */
-    interrupt_handler(0x1C) /* EXC_HYPERVISOR_INJECT */
-    interrupt_handler(0x1D) /* EXC_VMM_COMMUNICATION */
-    interrupt_handler(0x1E) /* EXC_SECURITY */
-    interrupt_handler(0x80) /* EXC_SYSCALL */
+interrupt_handler(0x0);  /* EXC_DIVISION */
+interrupt_handler(0x1);  /* EXC_DEBUG */
+interrupt_handler(0x2);  /* EXC_NM_INTERRUPT */
+interrupt_handler(0x3);  /* EXC_BREAKPOINT */
+interrupt_handler(0x4);  /* EXC_OVERFLOW */
+interrupt_handler(0x5);  /* EXC_RANGE_EXCEEDED */
+interrupt_handler(0x6);  /* EXC_INVALID_OPCODE */
+interrupt_handler(0x7);  /* EXC_DEVICE_NOT_AVAILABLE */
+interrupt_handler(0x8);  /* EXC_DOUBLE_FAULT */
+interrupt_handler(0x9);  /* EXC_SEGMENT_OVERRUN */
+interrupt_handler(0xA);  /* EXC_INVALID_TSS */
+interrupt_handler(0xB);  /* EXC_SEG_NOT_PRESENT */
+interrupt_handler(0xC);  /* EXC_SEG_FAULT_STACK */
+interrupt_handler(0xD);  /* EXC_GP_FAULT */
+interrupt_handler(0xE);  /* EXC_PAGE_FAULT */
+interrupt_handler(0x10); /* EXC_FLOATING_POINT */
+interrupt_handler(0x11); /* EXC_ALIGNMENT_CHECK */
+interrupt_handler(0x12); /* EXC_MACHINE_CHECK */
+interrupt_handler(0x13); /* EXC_SIMD */
+interrupt_handler(0x14); /* EXC_VIRTUALIZATION */
+interrupt_handler(0x15); /* EXC_CONTROL_PROTECTION */
+interrupt_handler(0x1C); /* EXC_HYPERVISOR_INJECT */
+interrupt_handler(0x1D); /* EXC_VMM_COMMUNICATION */
+interrupt_handler(0x1E); /* EXC_SECURITY */
+interrupt_handler(0x80); /* INT_SYSCALL */
 
 #define EXC_DIVISION 0x0
 #define EXC_DEBUG 0x1
@@ -59,9 +59,9 @@ interrupt_handler(0x0)      /* EXC_DIVISION */
 #define EXC_HYPERVISOR_INJECT 0x1C
 #define EXC_VMM_COMMUNICATION 0x1D
 #define EXC_SECURITY 0x1E
-#define EXC_SYSCALL 0x80
+#define INT_SYSCALL 0x80
 
-    typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed)) {
   uint16_t offset0;
   uint16_t ss;
   uint8_t ist : 3;
@@ -70,7 +70,7 @@ interrupt_handler(0x0)      /* EXC_DIVISION */
   uint16_t offset1;
   uint32_t offset2;
   uint32_t reserved1;
-} _idt_entry_t;
+} idt_entry_t;
 
 void idt_init();
 

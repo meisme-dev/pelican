@@ -3,7 +3,7 @@
 #include "pci.h"
 #include <stdint.h>
 
-_pci_vendor_t vendors[] = {
+pci_vendor_t vendors[] = {
     PCI_VENDOR(0x0001, "SafeNet (wrong ID)"),
     PCI_VENDOR(0x0010, "Allied Telesis, Inc (Wrong ID)"),
     PCI_VENDOR(0x0014, "Loongson Technology LLC"),
