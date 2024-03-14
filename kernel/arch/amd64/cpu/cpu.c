@@ -23,11 +23,12 @@ inline static void halt() {
 
 static void core_init(struct limine_smp_info *info) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
+
   acquire(&lock);
   gdt_init();
   idt_init();
   release(&lock);
-  log(SUCCESS, "CPU %u initialized", info->processor_id);
+  log_print(SUCCESS, "CPU %u initialized", info->processor_id);
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;
   }

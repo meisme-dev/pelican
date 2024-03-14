@@ -15,7 +15,7 @@ void interrupt(uint16_t interrupt, uint64_t cr2) {
       panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    ERROR: 0b%b", cr2, error & 0xff);
       break;
     case INT_SYSCALL:
-      log(DEBUG, "Recieved a system call");
+      log_print(DEBUG, "Recieved a system call");
       break;
     case EXC_GP_FAULT:
       panic("GENERAL PROTECTION FAULT");

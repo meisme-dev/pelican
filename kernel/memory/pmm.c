@@ -101,6 +101,6 @@ page_descriptor_t *pmm_init(void) {
   while (current_page->next) {
     current_page = current_page->next;
   }
-  log(SUCCESS, "Initialized PMM");
+  log_print(SUCCESS, "Initialized PMM");
   return page_head;
 }

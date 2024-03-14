@@ -3,6 +3,9 @@
 #include <terminal/log.h>
 
 #define DESC_COUNT 8
+#define FLAG_GRAN 0b1000
+#define FLAG_SIZE 0b0100
+#define FLAG_LONG 0b0010
 
 /* MUST BE GLOBAL OR WILL BE DROPPED */
 tss_t tss = {0};
@@ -36,11 +39,11 @@ static void gdt_set_tss(gdt_entry_t *entries) {
   entries[1].base2 = 0x0;
 }
 
-void gdt_init() {
+void gdt_init(void) {
   tss.iopb = sizeof(tss_t);
 
   gdt_set_entry(&gdt[0], 0x0, 0x0, 0x0, 0x0);                             /* Null                  */
-  gdt_set_entry(&gdt[1], 0x0, 0x0, 0x9A, 0xA);                            /* Kernel code           */
+  gdt_set_entry(&gdt[1], 0x0, 0x0, 0x9A, FLAG_GRAN | FLAG_LONG);          /* Kernel code           */
   gdt_set_entry(&gdt[2], 0x0, 0x0, 0x92, 0xC);                            /* Kernel data           */
   gdt_set_entry(&gdt[3], 0x0, 0x0, 0x0, 0x0);                             /* Null                  */
   gdt_set_entry(&gdt[4], 0x0, 0x0, 0xFA, 0xA);                            /* User code             */

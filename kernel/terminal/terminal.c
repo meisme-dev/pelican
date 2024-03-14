@@ -24,7 +24,7 @@ bool terminal_init(void) {
     return false;
   }
   set_bold(true);
-  log(SUCCESS, "Initialized terminal");
+  log_print(SUCCESS, "Initialized terminal");
   return true;
 }
 
