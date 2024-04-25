@@ -19,3 +19,4 @@ cpu_wrmsr:
   mov ecx, edi
   wrmsr
   ret
+

@@ -1,5 +1,6 @@
 #include "pmm.h"
 #include <exception/panic.h>
+#include <kernel.h>
 #include <limine/limine.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -15,6 +16,8 @@ static uint64_t total_mem = 0;
 static void pmm_allocate_list(void) {
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
+
+    total_mem += current_entry->length;
 
     /* If the current entry is not usable, or not large enough, skip */
     if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (sizeof(page_descriptor_t) * 2) + PAGE_SIZE) {
@@ -47,15 +50,13 @@ static void pmm_allocate_list(void) {
       memset(new_page_descriptor, 0, sizeof(page_descriptor_t));
 
       /* Take into account the page descriptor size when setting the base */
-      new_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + (sizeof(page_descriptor_t) * descriptor_count);
-      current_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + (sizeof(page_descriptor_t) * descriptor_count);
+      new_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
+      current_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
 
       /* Insert the new page descriptor */
       current_page_descriptor->next = new_page_descriptor;
       new_page_descriptor->prev = current_page_descriptor;
       current_page_descriptor = new_page_descriptor;
-
-      total_mem += PAGE_SIZE;
     }
   }
 }
@@ -77,6 +78,7 @@ page_descriptor_t *pmm_alloc_page(void) {
   page_head->next->prev = page_head;
   allocated_page->next = NULL;
   allocated_page->prev = NULL;
+
   release(&lock);
   return allocated_page;
 }
@@ -108,6 +110,5 @@ page_descriptor_t *pmm_init(void) {
   while (current_page->next) {
     current_page = current_page->next;
   }
-  log_print(SUCCESS, "Initialized PMM");
   return page_head;
 }

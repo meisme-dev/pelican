@@ -8,19 +8,19 @@ void interrupt(uint16_t interrupt, uint64_t cr2) {
   uint32_t error = exc_get_error() & 0xffffffff;
   switch (interrupt) {
     case EXC_ALIGNMENT_CHECK:
-      panic("ALIGNMENT CHECK");
+      //      panic("ALIGNMENT CHECK");
       break;
     case EXC_PAGE_FAULT:
       panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    ERROR: 0b%b", cr2, error & 0xff);
       break;
     case INT_SYSCALL:
-      log_print(DEBUG, "Recieved a system call");
+      //      log_print(DEBUG, "Recieved a system call");
       break;
     case EXC_GP_FAULT:
-      panic("GENERAL PROTECTION FAULT");
+      //      panic("GENERAL PROTECTION FAULT");
       break;
     default:
-      panic("UNHANDLED INTERRUPT");
+      //      panic("UNHANDLED INTERRUPT");
       break;
   }
   return;

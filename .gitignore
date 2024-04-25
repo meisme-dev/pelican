@@ -1,4 +1,5 @@
 .cache/
+.direnv/
 .vscode/
 toolchain/
 sysroot/

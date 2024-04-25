@@ -27,7 +27,6 @@ static void core_init(struct limine_smp_info *info) {
   gdt_init();
   idt_init();
   release(&lock);
-  log_print(SUCCESS, "CPU %u initialized", info->processor_id);
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;
   }

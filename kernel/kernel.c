@@ -12,12 +12,10 @@
 void kmain(void) {
   terminal_init();
   log_init(LOGLEVEL);
-  if (!(pmm_init())) {
-    panic("FAILED TO INTIALIZE PHYSICAL MEMORY MANAGER");
-  }
-  log_print(DEBUG, "Total memory: %u", pmm_get_total_mem());
   cpu_init();
+  pmm_init();
   paging_init();
+  log_print(DEBUG, "Total memory: %u", pmm_get_total_mem());
   asm volatile("int $0x80");
   cpu_halt();
 }

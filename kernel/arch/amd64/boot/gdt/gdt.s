@@ -9,6 +9,7 @@ gdtr:
 .section .text
 .global gdt_load
 .global gdt_segments_reload
+
 .type gdt_load, @function
 .type gdt_segments_reload, @function
 
