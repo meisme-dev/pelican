@@ -1,6 +1,5 @@
 #include "lock.h"
-#include <common/exception/panic.h>
-#include <stdint.h>
+#include <exception/panic.h>
 
 void acquire(volatile atomic_flag *flag) {
   while (atomic_flag_test_and_set_explicit(flag, memory_order_acquire))

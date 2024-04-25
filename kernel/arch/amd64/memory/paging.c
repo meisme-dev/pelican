@@ -1,45 +1,75 @@
 #include "paging.h"
-#include "common/exception/panic.h"
-#include "memory/pmm.h"
-#include "terminal/log.h"
 #include <limine/limine.h>
-#include <memory/vmm.h>
+#include <memory/pmm.h>
 #include <stdint.h>
-#include <string.h>
-
-static uint64_t *page_directory = NULL;
-static uint64_t *page_pointer_table = NULL;
-static uint64_t *first_page_table = NULL;
+#include <terminal/log.h>
 
 #define ROUND_UP(x, y) ((((x) + (y)-1) / (y)) * (y))
 #define ROUND_DOWN(x, y) ((x / y) * y)
 #define ROUND(x, y) ROUND_UP(x, y) - x < x - ROUND_DOWN(x, y) ? ROUND_UP(x, y) : ROUND_DOWN(x, y)
 
-void paging_init(void) {
-  if (page_directory != NULL) {
-    return;
+uint64_t page_level_map_4[512] __attribute__((aligned(0x1000))) = {0};
+
+static volatile struct limine_kernel_address_request kernel_address_request = {.id = LIMINE_KERNEL_ADDRESS_REQUEST, .revision = 0};
+// static volatile struct limine_hhdm_request hhdm_request = {.id = LIMINE_HHDM_REQUEST, .revision = 0};
+
+extern uint64_t text_section_begin, text_section_end, rodata_section_begin, rodata_section_end, data_section_begin, data_section_end;
+
+void paging_map(uint64_t src, uint64_t dst, uint16_t flags) {
+  uint8_t page_level_map_4_index = dst >> 48;
+  uint8_t pointer_table_index = dst >> 36;
+  uint8_t page_directory_index = dst >> 24;
+  uint8_t page_table_index = dst >> 12;
+
+  uint64_t *pointer_table = (void *)page_level_map_4[page_level_map_4_index];
+
+  if (((uint64_t)(&pointer_table) & 0x1) == 0) {
+    pointer_table = (void *)pmm_alloc_page()->base;
+    page_level_map_4[page_level_map_4_index] = (uint64_t)(&pointer_table) | 0x1;
   }
-  page_descriptor_t *mem = vmm_alloc_mem(1024 * sizeof(uint32_t) * 2);
 
-  if ((uint32_t)mem->base != mem->base) {
-    panic("Could not find an address that would fit in CR3");
+  uint64_t *page_directory = (void *)pointer_table[pointer_table_index];
+
+  if (((uint64_t)(&page_directory) & 0x1) == 0) {
+    page_directory = (void *)pmm_alloc_page()->base;
+    pointer_table[pointer_table_index] = (uint64_t)(&page_directory) | 0x1;
   }
 
-  page_directory = (void *)&mem->base;
-  first_page_table = (void *)(&mem->base + (512 * sizeof(uint64_t)));
+  uint64_t *page_table = (void *)page_directory[page_directory_index];
 
-  memset(page_directory, 2, 512 * sizeof(uint64_t));
-
-  for (uint16_t i = 0; i < 512; i++) {
-    first_page_table[i] = (i * 0x1000) | 3;
+  if (((uint64_t)(&page_table) & 0x1) == 0) {
+    page_table = (void *)pmm_alloc_page()->base;
+    page_directory[page_directory_index] = (uint64_t)(&page_table) | 0x1;
   }
 
-  page_directory[0] = (uint64_t)first_page_table | 3;
-
-  log_print(SUCCESS, "Initialiazed paging");
+  page_table[page_table_index] = src | (flags & 0xFFF) | 0x01;
 }
 
-void paging_map(uint64_t src, uint64_t dst) {
-  uint64_t pdpt_index = ROUND(src, 4096 * 262144) / (4096 * 262144);
-  uint64_t pd_index = ROUND(src, 4096 * 512);
+void paging_init(void) {
+  int64_t offset = kernel_address_request.response->physical_base - kernel_address_request.response->virtual_base;
+
+  uint64_t text_begin = ROUND_DOWN((uint64_t)&text_section_begin, PAGE_SIZE);
+  uint64_t rodata_begin = ROUND_DOWN((uint64_t)&rodata_section_begin, PAGE_SIZE);
+  uint64_t data_begin = ROUND_DOWN((uint64_t)&data_section_begin, PAGE_SIZE);
+  uint64_t text_end = ROUND_UP((uint64_t)&text_section_begin, PAGE_SIZE);
+  uint64_t rodata_end = ROUND_UP((uint64_t)&rodata_section_begin, PAGE_SIZE);
+  uint64_t data_end = ROUND_UP((uint64_t)&data_section_begin, PAGE_SIZE);
+
+  log_print(DEBUG, "%x, %x", text_begin, text_begin + offset);
+
+  for (uint64_t i = text_begin; i < text_end; i += PAGE_SIZE) {
+    paging_map(i + offset, i, 0x100); // Read + Supervisor
+  }
+
+  for (uint64_t i = rodata_begin; i < rodata_end; i += PAGE_SIZE) {
+    paging_map(i + offset, i, 0x100); // Read + Supervisor
+  }
+
+  for (uint64_t i = data_begin; i < data_end; i += PAGE_SIZE) {
+    paging_map(i + offset, i, 0x110); // Read/Write + Supervisor
+  }
+
+  log_print(DEBUG, "%x", (uint64_t)(&page_level_map_4));
+
+  paging_load((uint64_t)(&page_level_map_4));
 }

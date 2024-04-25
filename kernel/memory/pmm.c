@@ -1,5 +1,5 @@
 #include "pmm.h"
-#include <common/exception/panic.h>
+#include <exception/panic.h>
 #include <limine/limine.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -10,6 +10,7 @@
 
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
 static page_descriptor_t *page_head = NULL;
+static uint64_t total_mem = 0;
 
 static void pmm_allocate_list(void) {
   for (uint64_t i = 0; i < request.response->entry_count; i++) {
@@ -53,6 +54,8 @@ static void pmm_allocate_list(void) {
       current_page_descriptor->next = new_page_descriptor;
       new_page_descriptor->prev = current_page_descriptor;
       current_page_descriptor = new_page_descriptor;
+
+      total_mem += PAGE_SIZE;
     }
   }
 }
@@ -93,6 +96,10 @@ void pmm_free_page(page_descriptor_t *descriptor) {
   descriptor->prev = current_page_descriptor;
   descriptor->next = NULL;
   release(&lock);
+}
+
+uint64_t pmm_get_total_mem(void) {
+  return total_mem;
 }
 
 page_descriptor_t *pmm_init(void) {

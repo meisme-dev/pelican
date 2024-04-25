@@ -1,5 +1,4 @@
 #include "psf.h"
-#include <stdlib.h>
 #include <sync/lock.h>
 #include <terminal/terminal.h>
 #include <video/framebuffer.h>

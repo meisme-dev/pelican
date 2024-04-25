@@ -1,7 +1,6 @@
 #include "panic.h"
 #include <common/cpu/cpu.h>
 #include <stdatomic.h>
-#include <string.h>
 #include <sync/lock.h>
 #include <terminal/terminal.h>
 #include <video/framebuffer.h>

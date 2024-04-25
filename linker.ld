@@ -22,20 +22,30 @@ SECTIONS
     /* that is the beginning of the region. */
     . = 0xffffffff80000000;
  
+    text_section_begin = .;
+
     .text : {
         *(.text .text.*)
     } :text
  
+    text_section_end = .;
+
     /* Move to the next memory page for .rodata */
     . += CONSTANT(MAXPAGESIZE);
  
+    rodata_section_begin = .;
+
     .rodata : {
         *(.rodata .rodata.*)
     } :rodata
  
+    rodata_section_end = .;
+
     /* Move to the next memory page for .data */
     . += CONSTANT(MAXPAGESIZE);
  
+    data_section_begin = .;
+
     .data : {
         *(.data .data.*)
     } :data
@@ -44,11 +54,14 @@ SECTIONS
     /* unnecessary zeros will be written to the binary. */
     /* If you need, for example, .init_array and .fini_array, those should be placed */
     /* above this. */
+ 
     .bss : {
         *(COMMON)
         *(.bss .bss.*)
     } :data
- 
+
+    data_section_end = .;
+
     /* Discard .note.* and .eh_frame since they may cause issues on some hosts. */
     /DISCARD/ : {
         *(.eh_frame)

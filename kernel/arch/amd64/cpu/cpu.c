@@ -23,7 +23,6 @@ inline static void halt() {
 
 static void core_init(struct limine_smp_info *info) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
-
   acquire(&lock);
   gdt_init();
   idt_init();
@@ -32,7 +31,7 @@ static void core_init(struct limine_smp_info *info) {
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;
   }
-  halt();
+  halt(); /* TODO: Replace this with scheduler call when scheduler is implemented */
 }
 
 struct limine_smp_response *cpu_init() {

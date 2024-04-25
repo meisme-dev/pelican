@@ -1,6 +1,5 @@
 #include "idt.h"
-#include <common/exception/panic.h>
-#include <stddef.h>
+#include <exception/panic.h>
 #include <terminal/log.h>
 
 idt_entry_t idt_entries[256] = {0};

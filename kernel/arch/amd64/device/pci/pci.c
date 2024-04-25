@@ -1,6 +1,5 @@
 #include "pci.h"
 #include <arch/amd64/io/io.h>
-#include <stddef.h>
 
 #define CONFIG_ADDRESS 0xCF8
 #define CONFIG_DATA 0xCFC

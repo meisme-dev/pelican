@@ -6,7 +6,7 @@ kernel_sources = files([
   'terminal/terminal.c',
   'terminal/log.c',
   'terminal/psf.c',
-  'common/exception/panic.c',
+  'exception/panic.c',
   'sync/lock.c',
   'memory/pmm.c',
   'memory/vmm.c',

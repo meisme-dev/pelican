@@ -16,4 +16,6 @@ page_descriptor_t *pmm_init(void);
 
 page_descriptor_t *pmm_alloc_page(void);
 
+uint64_t pmm_get_total_mem(void);
+
 void pmm_free_page(page_descriptor_t *descriptor);
