@@ -3,7 +3,7 @@
 #include <common/device/pci/pci.h>
 #include <common/device/pci/vendors.h>
 #include <common/io/serial/serial.h>
-#include <common/memory/paging.h>
+#include <common/memory/vmm.h>
 #include <exception/panic.h>
 #include <memory/pmm.h>
 #include <terminal/log.h>
@@ -14,7 +14,7 @@ void kmain(void) {
   log_init(LOGLEVEL);
   cpu_init();
   pmm_init();
-  paging_init();
+  vmm_init();
   log_print(DEBUG, "Total memory: %u", pmm_get_total_mem());
   asm volatile("int $0x80");
   cpu_halt();

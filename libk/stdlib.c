@@ -18,14 +18,14 @@ void itoa(int64_t x, char *str, uint32_t base) {
     i++;
   }
 
-  for (uint64_t j = 0, i = strlen(str) - 1; j < strlen(str) / 2; j++, i--) {
+  for (size_t j = 0, i = strlen(str) - 1; j < strlen(str) / 2; j++, i--) {
     char tmp = str[i];
     str[i] = str[j];
     str[j] = tmp;
   }
 }
 
-void utoa(uint64_t x, char *str, uint32_t base) {
+void utoa(size_t x, char *str, uint32_t base) {
   size_t i = 0;
   str[0] = '0';
 
@@ -35,7 +35,7 @@ void utoa(uint64_t x, char *str, uint32_t base) {
     i++;
   }
 
-  for (uint64_t j = 0, i = strlen(str) - 1; j < strlen(str) / 2; j++, i--) {
+  for (size_t j = 0, i = strlen(str) - 1; j < strlen(str) / 2; j++, i--) {
     char tmp = str[i];
     str[i] = str[j];
     str[j] = tmp;

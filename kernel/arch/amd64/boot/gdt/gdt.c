@@ -50,8 +50,6 @@ void gdt_init(void) {
   gdt_set_tss(&gdt[6]);                                                   /* TSS                   */
   gdt_load((DESC_COUNT * sizeof(gdt_entry_t)) - 1, (uint64_t)&gdt, 0x30); /* 0x30 is the 6th entry */
   gdt_segments_reload();
-  // log(SUCCESS, "Loaded GDT at 0x%x", (uint64_t)&gdt);
-  // log(SUCCESS, "Loaded TSS at 0x%x", (uint64_t)&tss);
 }
 
 #undef DESC_COUNT

@@ -8,19 +8,17 @@ void interrupt(uint16_t interrupt, uint64_t cr2) {
   uint32_t error = exc_get_error() & 0xffffffff;
   switch (interrupt) {
     case EXC_ALIGNMENT_CHECK:
-      //      panic("ALIGNMENT CHECK");
       break;
     case EXC_PAGE_FAULT:
+      // TODO: Handle page faults
       panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    ERROR: 0b%b", cr2, error & 0xff);
       break;
     case INT_SYSCALL:
-      //      log_print(DEBUG, "Recieved a system call");
       break;
     case EXC_GP_FAULT:
-      //      panic("GENERAL PROTECTION FAULT");
       break;
     default:
-      //      panic("UNHANDLED INTERRUPT");
+      panic("UNHANDLED INTERRUPT");
       break;
   }
   return;
@@ -63,6 +61,5 @@ void idt_init(void) {
   idt_set(&idt_entries[EXC_VMM_COMMUNICATION], interrupt_handler_addr(0x1D));
   idt_set(&idt_entries[EXC_SECURITY], interrupt_handler_addr(0x1E));
   idt_set(&idt_entries[INT_SYSCALL], interrupt_handler_addr(0x80));
-  idt_load(sizeof(idt_entries) - 1, (uint64_t)&idt_entries);
-  // log(SUCCESS, "Loaded IDT at 0x%x", (uint64_t)&idt_entries);
+  idt_load(sizeof(idt_entries) - 1, (uintptr_t)&idt_entries);
 }

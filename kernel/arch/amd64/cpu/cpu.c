@@ -2,6 +2,7 @@
 #include <arch/amd64/exception/idt.h>
 #include <common/cpu/cpu.h>
 #include <limine/limine.h>
+#include <stddef.h>
 #include <sync/lock.h>
 #include <terminal/log.h>
 
@@ -34,7 +35,7 @@ static void core_init(struct limine_smp_info *info) {
 }
 
 struct limine_smp_response *cpu_init() {
-  for (uint64_t i = 0; i < smp_request.response->cpu_count; i++) {
+  for (size_t i = 0; i < smp_request.response->cpu_count; i++) {
     /* Main CPU does not support goto_address */
     if (smp_request.response->cpus[i]->lapic_id == smp_request.response->bsp_lapic_id) {
       core_init(smp_request.response->cpus[i]);
@@ -47,7 +48,7 @@ struct limine_smp_response *cpu_init() {
 }
 
 void cpu_halt() {
-  for (uint64_t i = 0; i < smp_request.response->cpu_count; i++) {
+  for (size_t i = 0; i < smp_request.response->cpu_count; i++) {
     if (smp_request.response->cpus[i]->lapic_id == smp_request.response->bsp_lapic_id) {
       continue;
     }

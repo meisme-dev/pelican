@@ -14,7 +14,7 @@ static page_descriptor_t *page_head = NULL;
 static uint64_t total_mem = 0;
 
 static void pmm_allocate_list(void) {
-  for (uint64_t i = 0; i < request.response->entry_count; i++) {
+  for (size_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
 
     total_mem += current_entry->length;

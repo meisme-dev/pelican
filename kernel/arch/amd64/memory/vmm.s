@@ -2,10 +2,10 @@
 
 .section .text
 
-.global paging_load
-.type paging_load, @function
+.global vmm_load
+.type vmm_load, @function
 
-paging_load:
+vmm_load:
   mov cr3, rdi
   ret
 
