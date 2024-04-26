@@ -1,7 +1,8 @@
 #include <arch/amd64/boot/gdt/gdt.h>
 #include <arch/amd64/exception/idt.h>
-#include <common/cpu/cpu.h>
+#include <cpu/cpu.h>
 #include <limine/limine.h>
+#include <memory/vmm.h>
 #include <stddef.h>
 #include <sync/lock.h>
 #include <terminal/log.h>
@@ -28,6 +29,9 @@ static void core_init(struct limine_smp_info *info) {
   gdt_init();
   idt_init();
   release(&lock);
+
+  vmm_init();
+
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;
   }

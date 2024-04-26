@@ -1,10 +1,11 @@
 #include "vmm.h"
 #include <arch/amd64/cpu/cpu.h>
-#include <common/memory/vmm.h>
 #include <kernel.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
+#include <memory/vmm.h>
 #include <stdint.h>
+#include <sync/lock.h>
 #include <terminal/log.h>
 
 static uint64_t direct_map_base = 0;
@@ -15,6 +16,9 @@ static volatile struct limine_hhdm_request hhdm_request = {.id = LIMINE_HHDM_REQ
 extern volatile uint64_t text_section_begin, text_section_end, rodata_section_begin, rodata_section_end, data_section_begin, data_section_end;
 
 void vmm_map(size_t src, size_t dst, size_t flags, uintptr_t **page_map_level_4) {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
+
   uint64_t page_map_level_4_index = (dst >> 39) & 0x1FF;
   uint64_t pointer_table_index = (dst >> 30) & 0x1FF;
   uint64_t page_directory_index = (dst >> 21) & 0x1FF;
@@ -42,9 +46,14 @@ void vmm_map(size_t src, size_t dst, size_t flags, uintptr_t **page_map_level_4)
   }
 
   page_table[page_table_index] = (src) | (flags);
+
+  release(&lock);
 }
 
 uintptr_t *vmm_init(void) {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
+
   struct limine_kernel_address_response *kernel_address_response = kernel_address_request.response;
   struct limine_hhdm_response *hhdm_response = hhdm_request.response;
 
@@ -78,6 +87,7 @@ uintptr_t *vmm_init(void) {
   }
 
   vmm_load((uintptr_t)(page_map_level_4)-direct_map_base);
+  release(&lock);
 
   return page_map_level_4;
 }
