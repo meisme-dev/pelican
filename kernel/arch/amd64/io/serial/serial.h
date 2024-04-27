@@ -1,2 +1,4 @@
+#pragma once
+
 #include <arch/amd64/io/io.h>
-#include <io/serial/serial.h>
+#include <arch/common/io/serial/serial.h>

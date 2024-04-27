@@ -3,7 +3,6 @@
 #include <kernel.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
-#include <memory/vmm.h>
 #include <stdint.h>
 #include <sync/lock.h>
 #include <terminal/log.h>

@@ -1,8 +1,8 @@
 #include <arch/amd64/boot/gdt/gdt.h>
 #include <arch/amd64/exception/idt.h>
-#include <cpu/cpu.h>
+#include <arch/common/cpu/cpu.h>
+#include <arch/common/memory/vmm.h>
 #include <limine/limine.h>
-#include <memory/vmm.h>
 #include <stddef.h>
 #include <sync/lock.h>
 #include <terminal/log.h>
@@ -30,7 +30,7 @@ static void core_init(struct limine_smp_info *info) {
   idt_init();
   release(&lock);
 
-  vmm_init();
+  vmm_init(); /* TODO: Reuse duplicate paging structures */
 
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;

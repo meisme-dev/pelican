@@ -1,3 +1,3 @@
 #pragma once
 
-#include <device/pci/pci.h>
+#include <arch/common/device/pci/pci.h>

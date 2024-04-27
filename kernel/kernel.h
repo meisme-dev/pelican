@@ -1,6 +1,6 @@
 #pragma once
 
-#include <device/pci/pci.h>
+#include <arch/common/device/pci/pci.h>
 #include <memory/pmm.h>
 
 #define ROUND_UP(x, y) ((((x) + (y)-1) / (y)) * (y))

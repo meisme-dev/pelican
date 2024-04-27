@@ -1,5 +1,5 @@
 #include "panic.h"
-#include <cpu/cpu.h>
+#include <arch/common/cpu/cpu.h>
 #include <stdatomic.h>
 #include <sync/lock.h>
 #include <terminal/terminal.h>

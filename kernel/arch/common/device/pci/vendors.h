@@ -1,7 +1,6 @@
 #pragma once
 
 #include "pci.h"
-#include <stdint.h>
 
 pci_vendor_t vendors[] = {
     PCI_VENDOR(0x0001, "SafeNet (wrong ID)"),

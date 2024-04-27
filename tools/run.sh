@@ -26,7 +26,8 @@ QEMU_ARGS="-d int \
            -M smm=off \
            -m 256m \
            -smp $(nproc) \
+	   -s \
            $EXTRA_ARGS \
-           --no-reboot" 
+           -no-shutdown" 
 
 ${QEMU_BINARY} ${QEMU_ARGS} "$@"

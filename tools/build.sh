@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -e
+
 TARGET=x86_64-elf
 
 yes n | tools/toolchain.sh $TARGET

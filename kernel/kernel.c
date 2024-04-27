@@ -1,11 +1,7 @@
 #include "kernel.h"
-#include <cpu/cpu.h>
-#include <device/pci/pci.h>
-#include <device/pci/vendors.h>
+#include <arch/common/cpu/cpu.h>
 #include <exception/panic.h>
-#include <io/serial/serial.h>
 #include <memory/pmm.h>
-#include <memory/vmm.h>
 #include <terminal/log.h>
 #include <terminal/terminal.h>
 
