@@ -20,4 +20,4 @@ typedef struct {
 } pci_vendor_t;
 
 #define PCI_VENDOR(id, name) \
-  { id, name }
+  {id, name}

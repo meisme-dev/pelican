@@ -10,4 +10,5 @@ kernel_sources = files([
   'sync/lock.c',
   'memory/pmm.c',
   'memory/vmm.c',
+  'task/task.c'
 ]) + arch_sources

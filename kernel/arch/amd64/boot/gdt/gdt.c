@@ -1,4 +1,5 @@
 #include "gdt.h"
+#include <arch/amd64/task/task.h>
 #include <terminal/log.h>
 
 #define DESC_COUNT 8
@@ -6,9 +7,8 @@
 #define FLAG_SIZE 0b0100
 #define FLAG_LONG 0b0010
 
-/* MUST BE GLOBAL OR WILL BE DROPPED */
-tss_t tss = {0};
-gdt_entry_t gdt[DESC_COUNT];
+static task_context_t tss = {0};
+static gdt_entry_t gdt[DESC_COUNT];
 
 static void gdt_set_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) {
   entry->base0 = base & 0xffff;
@@ -21,8 +21,8 @@ static void gdt_set_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit, uin
 }
 
 static void gdt_set_tss(gdt_entry_t *entries) {
-  entries[0].base0 = sizeof(tss) - 1;
-  entries[0].limit0 = (uint64_t)&tss & 0xffff;
+  entries[0].base0 = (uint64_t)&tss & 0xffff;
+  entries[0].limit0 = sizeof(tss) - 1;
   entries[0].base1 = ((uint64_t)&tss >> 16) & 0xff;
   entries[0].access = 0x89;
   entries[0].limit1 = 0x0;
@@ -39,7 +39,7 @@ static void gdt_set_tss(gdt_entry_t *entries) {
 }
 
 void gdt_init(void) {
-  tss.iopb = sizeof(tss_t);
+  tss.iopb = sizeof(task_context_t);
 
   gdt_set_entry(&gdt[0], 0x0, 0x0, 0x0, 0x0);                             /* Null                  */
   gdt_set_entry(&gdt[1], 0x0, 0x0, 0x9A, FLAG_GRAN | FLAG_LONG);          /* Kernel code           */

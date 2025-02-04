@@ -2,8 +2,11 @@
 #include <arch/common/cpu/cpu.h>
 #include <exception/panic.h>
 #include <memory/pmm.h>
+#include <task/task.h>
 #include <terminal/log.h>
 #include <terminal/terminal.h>
+
+static task_t kernel_task;
 
 void kmain(void) {
   terminal_init();

@@ -1,7 +1,7 @@
 #include <arch/amd64/boot/gdt/gdt.h>
 #include <arch/amd64/exception/idt.h>
+#include <arch/amd64/memory/vmm.h>
 #include <arch/common/cpu/cpu.h>
-#include <arch/common/memory/vmm.h>
 #include <limine/limine.h>
 #include <stddef.h>
 #include <sync/lock.h>
@@ -14,13 +14,8 @@ volatile struct limine_smp_request smp_request = {
 };
 
 inline static void halt() {
-  while (1) {
-    static atomic_flag lock = ATOMIC_FLAG_INIT;
-    acquire(&lock);
-    asm volatile("cli");
-    asm volatile("hlt");
-    release(&lock);
-  }
+  while (1)
+    ;
 }
 
 static void core_init(struct limine_smp_info *info) {
@@ -30,7 +25,8 @@ static void core_init(struct limine_smp_info *info) {
   idt_init();
   release(&lock);
 
-  vmm_init(); /* TODO: Reuse duplicate paging structures */
+  uint64_t *page_map_level_4 = vmm_init();
+  vmm_load((uintptr_t)(page_map_level_4)-vmm_get_direct_map_base());
 
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;

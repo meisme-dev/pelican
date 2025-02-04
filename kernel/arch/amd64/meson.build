@@ -8,6 +8,7 @@ arch_sources = files([
   'io/serial/serial.c',
   'memory/vmm.s',
   'memory/vmm.c',
+  'task/task.c',
   'io/io.c',
   'device/pci/pci.c',
 ])

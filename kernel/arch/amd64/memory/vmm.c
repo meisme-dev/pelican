@@ -14,6 +14,10 @@ static volatile struct limine_hhdm_request hhdm_request = {.id = LIMINE_HHDM_REQ
 
 extern volatile uint64_t text_section_begin, text_section_end, rodata_section_begin, rodata_section_end, data_section_begin, data_section_end;
 
+uint64_t vmm_get_direct_map_base() {
+  return direct_map_base;
+}
+
 void vmm_map(size_t src, size_t dst, size_t flags, uintptr_t **page_map_level_4) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
@@ -85,7 +89,6 @@ uintptr_t *vmm_init(void) {
     vmm_map(i, i + direct_map_base, 0b11, &page_map_level_4);
   }
 
-  vmm_load((uintptr_t)(page_map_level_4)-direct_map_base);
   release(&lock);
 
   return page_map_level_4;

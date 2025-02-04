@@ -16,6 +16,7 @@ void interrupt(uint16_t interrupt, uint64_t cr2) {
     case INT_SYSCALL:
       break;
     case EXC_GP_FAULT:
+      panic("GP");
       break;
     default:
       panic("UNHANDLED INTERRUPT");

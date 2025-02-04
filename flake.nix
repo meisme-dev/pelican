@@ -14,11 +14,11 @@
           ninja
           gcc
           gcc_multi
+          libtool
           gnumake
           bison
           flex
           texinfo
-          cloog
           xorriso
           qemu
           clang-tools

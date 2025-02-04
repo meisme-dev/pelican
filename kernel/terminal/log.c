@@ -4,11 +4,11 @@
 #include <terminal/terminal.h>
 
 #define LOG_LEVEL_INFO(log_level, color) \
-  { log_level, "[" #log_level "] ", color }
+  {log_level, "[" #log_level "] ", color}
 
 static uint8_t level = 4;
 static struct log_level_info {
-  _log_level_t log_level;
+  log_level_t log_level;
   char *name;
   uint32_t color;
 } infos[] = {
@@ -27,7 +27,7 @@ void log_init(uint8_t log_level) {
   log_print(SUCCESS, "Initialized logging");
 }
 
-void log_print(_log_level_t log_level, char *format, ...) {
+void log_print(log_level_t log_level, char *format, ...) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
   va_list args;
