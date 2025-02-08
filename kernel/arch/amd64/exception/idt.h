@@ -7,7 +7,7 @@ void interrupt(uint16_t interrupt, uint64_t cr2);
 #define interrupt_handler(x) \
   extern void interrupt_##x()
 
-#define interrupt_handler_addr(x) (uint64_t) interrupt_##x
+#define interrupt_handler_addr(x) (uint64_t)interrupt_##x
 
 interrupt_handler(0x0);  /* EXC_DIVISION */
 interrupt_handler(0x1);  /* EXC_DEBUG */

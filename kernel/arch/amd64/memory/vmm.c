@@ -53,6 +53,55 @@ void vmm_map(size_t src, size_t dst, size_t flags, uintptr_t **page_map_level_4)
   release(&lock);
 }
 
+void *vmm_get_free(uintptr_t **page_map_level_4) {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
+
+  size_t dst = 0;
+  while (dst += PAGE_SIZE && dst < 1LL << 48) {
+    uint64_t page_map_level_4_index = (dst >> 39) & 0x1FF;
+    uint64_t pointer_table_index = (dst >> 30) & 0x1FF;
+    uint64_t page_directory_index = (dst >> 21) & 0x1FF;
+    uint64_t page_table_index = (dst >> 12) & 0x1FF;
+
+    uint64_t *pointer_table = (void *)(((*page_map_level_4)[page_map_level_4_index] & 0xFFFFFFFFFF000) + direct_map_base);
+
+    page_descriptor_t *page_descriptor = pmm_alloc_page();
+    if (((*page_map_level_4)[page_map_level_4_index] & 0x1) == 0) {
+      pointer_table = (void *)page_descriptor->base;
+      (*page_map_level_4)[page_map_level_4_index] = (uint64_t)pointer_table | 0b11;
+    }
+
+    uint64_t *page_directory = (void *)((pointer_table[pointer_table_index] & 0xFFFFFFFFFF000) + direct_map_base);
+
+    page_descriptor_t *directory_page_descriptor = pmm_alloc_page();
+    if ((pointer_table[pointer_table_index] & 0x1) == 0) {
+      page_directory = (void *)page_descriptor->base;
+      pointer_table[pointer_table_index] = (uint64_t)page_directory | 0b11;
+    }
+
+    uint64_t *page_table = (void *)((page_directory[page_directory_index] & 0xFFFFFFFFFF000) + direct_map_base);
+
+    page_descriptor_t *table_page_descriptor = pmm_alloc_page();
+    if ((page_directory[page_directory_index] & 0x1) == 0) {
+      page_table = (void *)page_descriptor->base;
+      page_directory[page_directory_index] = (uint64_t)page_table | 0b11;
+    }
+
+    if (page_table[page_table_index] == 0) {
+      release(&lock);
+      return (void *)(page_table[page_table_index] << 4);
+    } else {
+      pmm_free_page(table_page_descriptor);
+      pmm_free_page(directory_page_descriptor);
+      pmm_free_page(page_descriptor);
+    }
+  }
+
+  release(&lock);
+  return NULL;
+}
+
 uintptr_t *vmm_init(void) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
