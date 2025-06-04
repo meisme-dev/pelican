@@ -15,7 +15,7 @@ volatile struct limine_smp_request smp_request = {
 
 inline static void halt() {
   while (1) {
-    __asm__("pause");
+    __asm__("hlt");
   }
 }
 
@@ -24,14 +24,15 @@ static void core_init(struct limine_smp_info *info) {
   acquire(&lock);
   gdt_init();
   idt_init();
-  release(&lock);
 
   uint64_t *page_map_level_4 = vmm_init();
   vmm_load((uintptr_t)(page_map_level_4)-vmm_get_direct_map_base());
+  release(&lock);
 
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;
   }
+
   halt(); /* TODO: Replace this with scheduler call when scheduler is implemented */
 }
 
@@ -43,7 +44,7 @@ struct limine_smp_response *cpu_init() {
       continue;
     }
     /* Load GDT and IDT */
-    smp_request.response->cpus[i]->goto_address = core_init;
+    // smp_request.response->cpus[i]->goto_address = core_init;
   }
   return smp_request.response;
 }
