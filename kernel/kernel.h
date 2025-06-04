@@ -7,6 +7,6 @@
 #define ROUND_DOWN(x, y) ((x / y) * y)
 #define ROUND(x, y) ROUND_UP(x, y) - x < x - ROUND_DOWN(x, y) ? ROUND_UP(x, y) : ROUND_DOWN(x, y)
 
-#ifndef LOGLEVEL
-#define LOGLEVEL DEBUG
+#ifndef LOG_LEVEL
+#define LOG_LEVEL DEBUG
 #endif

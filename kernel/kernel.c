@@ -10,7 +10,7 @@ static task_t kernel_task;
 
 void kmain(void) {
   terminal_init();
-  log_init(LOGLEVEL);
+  log_init(LOG_LEVEL);
   pmm_init();
   cpu_init();
   log_print(SUCCESS, "Detected memory: %u", pmm_get_total_mem());
