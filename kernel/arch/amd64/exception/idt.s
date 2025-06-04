@@ -3,7 +3,7 @@
 
 .section .data
 
-idtr: 
+idtr:
   .word 0
   .long 0
 
@@ -84,6 +84,7 @@ exc_get_rip:
 
 interrupt_\x:
   cld
+  mov rdx, qword ptr [rsp + 8]
   pushaq
   mov di, \x
   mov rsi, cr2
@@ -109,7 +110,7 @@ interrupt_handler 0xD  # EXC_GP_FAULT
 interrupt_handler 0xE  # EXC_PAGE_FAULT
 interrupt_handler 0x10 # EXC_FLOATING_POINT
 interrupt_handler 0x11 # EXC_ALIGNMENT_CHECK
-interrupt_handler 0x12 # EXC_MACHINE_CHECK 
+interrupt_handler 0x12 # EXC_MACHINE_CHECK
 interrupt_handler 0x13 # EXC_SIMD
 interrupt_handler 0x14 # EXC_VIRTUALIZATION
 interrupt_handler 0x15 # EXC_CONTROL_PROTECTION

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-void interrupt(uint16_t interrupt, uint64_t cr2);
+void interrupt(uint16_t interrupt, uint64_t cr2, uint64_t rip);
 
 #define interrupt_handler(x) \
   extern void interrupt_##x()

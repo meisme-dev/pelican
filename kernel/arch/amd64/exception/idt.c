@@ -1,22 +1,23 @@
 #include "idt.h"
 #include <exception/panic.h>
+#include <stdint.h>
 #include <terminal/log.h>
 
 idt_entry_t idt_entries[256] = {0};
 
-void interrupt(uint16_t interrupt, uint64_t cr2) {
+void interrupt(uint16_t interrupt, uint64_t cr2, uint64_t rip) {
   uint32_t error = exc_get_error() & 0xffffffff;
   switch (interrupt) {
     case EXC_ALIGNMENT_CHECK:
       break;
     case EXC_PAGE_FAULT:
       // TODO: Handle page faults
-      panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    ERROR: 0b%b", cr2, error & 0xff);
+      panic("PAGE FAULT:\n    ADDRESS: 0x%x\n    ERROR: 0b%b\n    INSTRUCTION: 0x%x", cr2, error & 0xff, rip);
       break;
     case INT_SYSCALL:
       break;
     case EXC_GP_FAULT:
-      panic("GP");
+      panic("GENERAL PROTECTION FAULT:\n    INSTRUCTION: 0x%x", rip);
       break;
     default:
       panic("UNHANDLED INTERRUPT");
