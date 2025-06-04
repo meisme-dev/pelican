@@ -38,7 +38,10 @@ void log_print(log_level_t log_level, char *format, ...) {
   for (int32_t i = sizeof(infos) / sizeof(struct log_level_info); i--;) {
     if (infos[i].log_level == log_level) {
       set_col(0x0, infos[i].color);
+      // TODO: Retain state
+      set_bold(true);
       kputs(infos[i].name);
+      set_bold(false);
     }
   }
   set_col(0x0, 0xffffff);

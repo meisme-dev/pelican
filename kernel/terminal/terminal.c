@@ -23,7 +23,7 @@ bool terminal_init(void) {
   if (framebuffer == NULL) {
     return false;
   }
-  set_bold(true);
+  set_bold(false);
   log_print(SUCCESS, "Initialized terminal");
   return true;
 }
