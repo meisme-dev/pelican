@@ -17,6 +17,7 @@ struct limine_framebuffer *framebuffer;
 
 static uint32_t x = 0, y = 0, fg = 0xffffff, bg = 0;
 static psf_font_t *psf_font;
+static atomic_flag locks[4] = {ATOMIC_FLAG_INIT};
 
 bool terminal_init(void) {
   framebuffer = framebuffer_create();
@@ -29,79 +30,71 @@ bool terminal_init(void) {
 }
 
 void set_bold(bool bold) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
+  acquire(&locks[0]);
   if (bold) {
     psf_font = (psf_font_t *)&_binary____assets_bold_psf_start;
     psf_init((psf_font_t *)&_binary____assets_bold_psf_start);
-    release(&lock);
+    release(&locks[0]);
     return;
   }
   psf_font = (psf_font_t *)&_binary____assets_regular_psf_start;
   psf_init((psf_font_t *)&_binary____assets_regular_psf_start);
-  release(&lock);
+  release(&locks[0]);
 }
 
 void reset_pos(void) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
+  acquire(&locks[0]);
   x = 0;
   y = 0;
-  release(&lock);
+  release(&locks[0]);
 }
 
 void set_col(uint32_t nbg, uint32_t nfg) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
+  acquire(&locks[0]);
   bg = nbg;
   fg = nfg;
-  release(&lock);
+  release(&locks[0]);
 }
 
 void kputchar(const char c) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
+  acquire(&locks[3]);
   if (c == '\n') {
     y += psf_font->height;
     x = 0;
-    release(&lock);
+    release(&locks[3]);
     return;
   }
   psf_putchar(c, &x, &y, fg, bg);
-  release(&lock);
+  release(&locks[3]);
 }
 
 void kputs(const char *c) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
+  acquire(&locks[2]);
   while (*c != '\0') {
     kputchar(*c);
     c++;
   }
-  release(&lock);
+  release(&locks[2]);
 }
 
 void puts(const char *str) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
+  acquire(&locks[0]);
   kputs(str);
   kputchar('\n');
-  release(&lock);
+  release(&locks[0]);
 }
 
 void printf(char *format, ...) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
+  acquire(&locks[0]);
   va_list args;
   va_start(args, format);
   vprintf(format, args);
   va_end(args);
-  release(&lock);
+  release(&locks[0]);
 }
 
 void vprintf(char *format, va_list args) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
+  acquire(&locks[1]);
   char *ptr = format;
   while (*ptr) {
     if (*ptr == '%') {
@@ -137,9 +130,11 @@ void vprintf(char *format, va_list args) {
       kputchar(*ptr++);
     }
   }
-  release(&lock);
+  release(&locks[1]);
 }
 
 void _trace(const char *file, size_t line) {
+  acquire(&locks[0]);
   printf("At %s:%d:\n", file, line);
+  release(&locks[0]);
 }
