@@ -4,6 +4,7 @@
 #include <kernel.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <sync/lock.h>
 #include <terminal/log.h>
@@ -19,6 +20,26 @@ uint64_t vmm_get_direct_map_base() {
   return direct_map_base;
 }
 
+static uint64_t *vmm_next_level(uintptr_t **current_level, uint64_t index) {
+  uint64_t *next_level = 0;
+
+  if (((*current_level)[index] & 0xFFFFFFFFFF000) == 0) {
+    page_descriptor_t *page = pmm_alloc_page();
+
+    if (page == NULL || page->base == 0) {
+      panic("OUT OF MEMORY");
+    }
+
+    next_level = (void *)page->base;
+    (*current_level)[index] = (uint64_t)next_level | 0b11;
+
+    return next_level;
+  }
+
+  next_level = (void *)(((*current_level)[index] & 0xFFFFFFFFFF000) + direct_map_base);
+  return next_level;
+}
+
 void vmm_map(size_t src, size_t dst, size_t flags, uintptr_t **page_map_level_4) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
@@ -28,38 +49,9 @@ void vmm_map(size_t src, size_t dst, size_t flags, uintptr_t **page_map_level_4)
   uint64_t page_directory_index = (dst >> 21) & 0x1FF;
   uint64_t page_table_index = (dst >> 12) & 0x1FF;
 
-  uint64_t *pointer_table = (void *)(((*page_map_level_4)[page_map_level_4_index] & 0xFFFFFFFFFF000) + direct_map_base);
-
-  if (((*page_map_level_4)[page_map_level_4_index] & 0x1) == 0) {
-    pointer_table = (void *)pmm_alloc_page()->base;
-    (*page_map_level_4)[page_map_level_4_index] = (uint64_t)pointer_table | 0b11;
-  }
-
-  if (pointer_table == 0) {
-    panic("OUT OF MEMORY");
-  }
-
-  uint64_t *page_directory = (void *)((pointer_table[pointer_table_index] & 0xFFFFFFFFFF000) + direct_map_base);
-
-  if ((pointer_table[pointer_table_index] & 0x1) == 0) {
-    page_directory = (void *)pmm_alloc_page()->base;
-    pointer_table[pointer_table_index] = (uint64_t)page_directory | 0b11;
-  }
-
-  if (page_directory == 0) {
-    panic("OUT OF MEMORY");
-  }
-
-  uint64_t *page_table = (void *)((page_directory[page_directory_index] & 0xFFFFFFFFFF000) + direct_map_base);
-
-  if ((page_directory[page_directory_index] & 0x1) == 0) {
-    page_table = (void *)pmm_alloc_page()->base;
-    page_directory[page_directory_index] = (uint64_t)page_table | 0b11;
-  }
-
-  if (page_table == 0) {
-    panic("OUT OF MEMORY");
-  }
+  uint64_t *pointer_table = vmm_next_level(page_map_level_4, page_map_level_4_index);
+  uint64_t *page_directory = vmm_next_level(&pointer_table, pointer_table_index);
+  uint64_t *page_table = vmm_next_level(&page_directory, page_directory_index);
 
   page_table[page_table_index] = (src) | (flags);
 
@@ -75,7 +67,13 @@ uintptr_t *vmm_init(void) {
 
   direct_map_base = hhdm_response->offset;
 
-  uint64_t *page_map_level_4 = (void *)(pmm_alloc_page()->base + direct_map_base);
+  page_descriptor_t *page = pmm_alloc_page();
+
+  if (page == NULL || page->base == 0) {
+    panic("OUT OF MEMORY");
+  }
+
+  uint64_t *page_map_level_4 = (void *)(page->base + direct_map_base);
 
   uintptr_t text_begin = ROUND_DOWN((uintptr_t)&text_section_begin, PAGE_SIZE);
   uintptr_t rodata_begin = ROUND_DOWN((uintptr_t)&rodata_section_begin, PAGE_SIZE);
@@ -101,11 +99,13 @@ uintptr_t *vmm_init(void) {
   for (size_t i = 0; i < response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = response->entries[i];
 
-    if (current_entry->type == LIMINE_MEMMAP_RESERVED || current_entry->type == LIMINE_MEMMAP_BAD_MEMORY) {
+    if (current_entry->type != LIMINE_MEMMAP_USABLE &&
+        current_entry->type != LIMINE_MEMMAP_FRAMEBUFFER &&
+        current_entry->type != LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE) {
       continue;
     }
 
-    for (size_t j = 0; j < current_entry->length; j += PAGE_SIZE) {
+    for (size_t j = 0; j <= current_entry->length - PAGE_SIZE; j += PAGE_SIZE) {
       vmm_map(current_entry->base + j, current_entry->base + j, 0b11, &page_map_level_4);
       vmm_map(current_entry->base + j, current_entry->base + j + direct_map_base, 0b11, &page_map_level_4);
     }

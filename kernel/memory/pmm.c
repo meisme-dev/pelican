@@ -14,13 +14,14 @@ static page_descriptor_t *page_head = NULL;
 static uint64_t total_mem = 0;
 
 static void pmm_allocate_list(void) {
+  uint64_t j = 0;
   for (size_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
 
-    log_print(DEBUG, "(Memory map) Type: %u, Size: 0x%x", current_entry->type, current_entry->length);
+    log_print(DEBUG, "(Memory map) Type: %u, Base, 0x%x, Size: 0x%x", current_entry->type, current_entry->base, current_entry->length);
 
     /* If the current entry is not usable, or not large enough, skip */
-    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (sizeof(page_descriptor_t) * 2) + PAGE_SIZE) {
+    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length <= (sizeof(page_descriptor_t) * 2) + PAGE_SIZE) {
       continue;
     }
 
@@ -47,12 +48,18 @@ static void pmm_allocate_list(void) {
       current_page_descriptor = current_page_descriptor->next;
     }
 
-    for (uint64_t j = 0; j < descriptor_count; j++) {
-      page_descriptor_t *new_page_descriptor = &entry_page_head[j];
+    uint64_t k = j;
+
+    while (k - j < descriptor_count) {
+      page_descriptor_t *new_page_descriptor = &entry_page_head[k];
       memset(new_page_descriptor, 0, sizeof(page_descriptor_t));
 
+      if (current_entry->base + ((k - j) * PAGE_SIZE) + ROUND_UP(sizeof(page_descriptor_t) * descriptor_count, PAGE_SIZE) >= current_entry->base + current_entry->length - PAGE_SIZE) {
+        break;
+      }
+
       /* Take into account the page descriptor size when setting the base */
-      new_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
+      new_page_descriptor->base = current_entry->base + ((k - j) * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
       // current_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
 
       // log_print(DEBUG, "0x%x 0x%x", current_page_descriptor->base, new_page_descriptor->base);
@@ -61,7 +68,11 @@ static void pmm_allocate_list(void) {
       current_page_descriptor->next = new_page_descriptor;
       new_page_descriptor->prev = current_page_descriptor;
       current_page_descriptor = new_page_descriptor;
+
+      k++;
     }
+
+    j = k;
   }
 }
 
@@ -71,11 +82,13 @@ page_descriptor_t *pmm_alloc_page(void) {
   /* Take the next usable page, instead of taking page_head */
   page_descriptor_t *allocated_page = page_head->next;
 
-  if (allocated_page->next == NULL || allocated_page == NULL) {
+  if (allocated_page->next == NULL || allocated_page == NULL || allocated_page == page_head) {
     /* Return as there is likely not enough free memory */
     release(&lock);
     return NULL;
   }
+
+  memset((void *)allocated_page->base, 0, PAGE_SIZE);
 
   /* Drop the descriptor from the free list, so that nothing else tries to allocate it */
   page_head->next = allocated_page->next;
