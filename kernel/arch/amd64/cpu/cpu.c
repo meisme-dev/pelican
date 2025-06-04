@@ -14,8 +14,9 @@ volatile struct limine_smp_request smp_request = {
 };
 
 inline static void halt() {
-  while (1)
-    ;
+  while (1) {
+    __asm__("pause");
+  }
 }
 
 static void core_init(struct limine_smp_info *info) {
