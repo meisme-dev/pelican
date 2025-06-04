@@ -11,7 +11,7 @@ kernel_sources = files([
   'memory/pmm.c',
   'memory/vmm.c',
   'memory/alloc.c',
-  'memory/liballoc/liballoc.c',
-  'memory/liballoc/liballoc_platform.c',
+  # 'memory/liballoc/liballoc.c',
+  # 'memory/liballoc/liballoc_platform.c',
   'task/task.c'
 ]) + arch_sources

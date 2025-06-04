@@ -1,5 +1,6 @@
 #include "vmm.h"
 #include <arch/amd64/cpu/cpu.h>
+#include <exception/panic.h>
 #include <kernel.h>
 #include <limine/limine.h>
 #include <memory/pmm.h>
@@ -34,11 +35,19 @@ void vmm_map(size_t src, size_t dst, size_t flags, uintptr_t **page_map_level_4)
     (*page_map_level_4)[page_map_level_4_index] = (uint64_t)pointer_table | 0b11;
   }
 
+  if (pointer_table == 0) {
+    panic("OUT OF MEMORY");
+  }
+
   uint64_t *page_directory = (void *)((pointer_table[pointer_table_index] & 0xFFFFFFFFFF000) + direct_map_base);
 
   if ((pointer_table[pointer_table_index] & 0x1) == 0) {
     page_directory = (void *)pmm_alloc_page()->base;
     pointer_table[pointer_table_index] = (uint64_t)page_directory | 0b11;
+  }
+
+  if (page_directory == 0) {
+    panic("OUT OF MEMORY");
   }
 
   uint64_t *page_table = (void *)((page_directory[page_directory_index] & 0xFFFFFFFFFF000) + direct_map_base);
@@ -48,58 +57,13 @@ void vmm_map(size_t src, size_t dst, size_t flags, uintptr_t **page_map_level_4)
     page_directory[page_directory_index] = (uint64_t)page_table | 0b11;
   }
 
+  if (page_table == 0) {
+    panic("OUT OF MEMORY");
+  }
+
   page_table[page_table_index] = (src) | (flags);
 
   release(&lock);
-}
-
-void *vmm_get_free(uintptr_t **page_map_level_4) {
-  static atomic_flag lock = ATOMIC_FLAG_INIT;
-  acquire(&lock);
-
-  size_t dst = 0;
-  while (dst += PAGE_SIZE && dst < 1LL << 48) {
-    uint64_t page_map_level_4_index = (dst >> 39) & 0x1FF;
-    uint64_t pointer_table_index = (dst >> 30) & 0x1FF;
-    uint64_t page_directory_index = (dst >> 21) & 0x1FF;
-    uint64_t page_table_index = (dst >> 12) & 0x1FF;
-
-    uint64_t *pointer_table = (void *)(((*page_map_level_4)[page_map_level_4_index] & 0xFFFFFFFFFF000) + direct_map_base);
-
-    page_descriptor_t *page_descriptor = pmm_alloc_page();
-    if (((*page_map_level_4)[page_map_level_4_index] & 0x1) == 0) {
-      pointer_table = (void *)page_descriptor->base;
-      (*page_map_level_4)[page_map_level_4_index] = (uint64_t)pointer_table | 0b11;
-    }
-
-    uint64_t *page_directory = (void *)((pointer_table[pointer_table_index] & 0xFFFFFFFFFF000) + direct_map_base);
-
-    page_descriptor_t *directory_page_descriptor = pmm_alloc_page();
-    if ((pointer_table[pointer_table_index] & 0x1) == 0) {
-      page_directory = (void *)page_descriptor->base;
-      pointer_table[pointer_table_index] = (uint64_t)page_directory | 0b11;
-    }
-
-    uint64_t *page_table = (void *)((page_directory[page_directory_index] & 0xFFFFFFFFFF000) + direct_map_base);
-
-    page_descriptor_t *table_page_descriptor = pmm_alloc_page();
-    if ((page_directory[page_directory_index] & 0x1) == 0) {
-      page_table = (void *)page_descriptor->base;
-      page_directory[page_directory_index] = (uint64_t)page_table | 0b11;
-    }
-
-    if (page_table[page_table_index] == 0) {
-      release(&lock);
-      return (void *)(page_table[page_table_index] << 4);
-    } else {
-      pmm_free_page(table_page_descriptor);
-      pmm_free_page(directory_page_descriptor);
-      pmm_free_page(page_descriptor);
-    }
-  }
-
-  release(&lock);
-  return NULL;
 }
 
 uintptr_t *vmm_init(void) {
@@ -109,7 +73,6 @@ uintptr_t *vmm_init(void) {
   struct limine_kernel_address_response *kernel_address_response = kernel_address_request.response;
   struct limine_hhdm_response *hhdm_response = hhdm_request.response;
 
-  uint64_t total_mem = pmm_get_total_mem();
   direct_map_base = hhdm_response->offset;
 
   uint64_t *page_map_level_4 = (void *)(pmm_alloc_page()->base + direct_map_base);
@@ -133,9 +96,19 @@ uintptr_t *vmm_init(void) {
     vmm_map(i - kernel_address_response->virtual_base + kernel_address_response->physical_base, i, 0b11, &page_map_level_4); // Read/Write + Present
   }
 
-  for (size_t i = 0; i < total_mem; i += PAGE_SIZE) {
-    vmm_map(i, i, 0b11, &page_map_level_4);
-    vmm_map(i, i + direct_map_base, 0b11, &page_map_level_4);
+  struct limine_memmap_response *response = pmm_get_memmap();
+
+  for (size_t i = 0; i < response->entry_count; i++) {
+    struct limine_memmap_entry *current_entry = response->entries[i];
+
+    if (current_entry->type == LIMINE_MEMMAP_RESERVED || current_entry->type == LIMINE_MEMMAP_BAD_MEMORY) {
+      continue;
+    }
+
+    for (size_t j = 0; j < current_entry->length; j += PAGE_SIZE) {
+      vmm_map(current_entry->base + j, current_entry->base + j, 0b11, &page_map_level_4);
+      vmm_map(current_entry->base + j, current_entry->base + j + direct_map_base, 0b11, &page_map_level_4);
+    }
   }
 
   release(&lock);

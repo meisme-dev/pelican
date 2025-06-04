@@ -19,6 +19,7 @@ int liballoc_unlock() {
 }
 
 void *liballoc_alloc(int pages) {
-  page_descriptor_t *page = vmm_alloc_mem(pages * PAGE_SIZE);
-  return (void *)page->base;
+  // page_descriptor_t *page = vmm_alloc_mem(pages * PAGE_SIZE);
+  // return (void *)page->base;
+  return (void *)pages;
 }

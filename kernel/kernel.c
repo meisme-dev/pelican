@@ -13,7 +13,7 @@ void kmain(void) {
   log_init(LOGLEVEL);
   pmm_init();
   cpu_init();
-  log_print(DEBUG, "Total memory: %u", pmm_get_total_mem());
+  log_print(SUCCESS, "Detected memory: %u", pmm_get_total_mem());
   asm volatile("int $0x80");
   cpu_halt();
 }

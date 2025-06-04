@@ -8,4 +8,3 @@
 vmm_load:
   mov cr3, rdi
   ret
-

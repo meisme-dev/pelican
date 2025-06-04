@@ -18,4 +18,6 @@ page_descriptor_t *pmm_alloc_page(void);
 
 uint64_t pmm_get_total_mem(void);
 
+struct limine_memmap_response *pmm_get_memmap(void);
+
 void pmm_free_page(page_descriptor_t *descriptor);

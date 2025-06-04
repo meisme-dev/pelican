@@ -17,12 +17,14 @@ static void pmm_allocate_list(void) {
   for (size_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
 
-    total_mem += current_entry->length;
+    log_print(DEBUG, "(Memory map) Type: %u, Size: 0x%x", current_entry->type, current_entry->length);
 
     /* If the current entry is not usable, or not large enough, skip */
     if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (sizeof(page_descriptor_t) * 2) + PAGE_SIZE) {
       continue;
     }
+
+    total_mem += current_entry->length;
 
     uint64_t descriptor_count = current_entry->length / PAGE_SIZE;
     page_descriptor_t *entry_page_head = (page_descriptor_t *)current_entry->base;
@@ -51,7 +53,9 @@ static void pmm_allocate_list(void) {
 
       /* Take into account the page descriptor size when setting the base */
       new_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
-      current_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
+      // current_page_descriptor->base = current_entry->base + (j * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
+
+      // log_print(DEBUG, "0x%x 0x%x", current_page_descriptor->base, new_page_descriptor->base);
 
       /* Insert the new page descriptor */
       current_page_descriptor->next = new_page_descriptor;
@@ -102,6 +106,10 @@ void pmm_free_page(page_descriptor_t *descriptor) {
 
 uint64_t pmm_get_total_mem(void) {
   return total_mem;
+}
+
+struct limine_memmap_response *pmm_get_memmap(void) {
+  return request.response;
 }
 
 page_descriptor_t *pmm_init(void) {
