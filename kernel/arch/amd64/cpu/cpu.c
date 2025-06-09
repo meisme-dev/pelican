@@ -1,9 +1,12 @@
+#include "exception/panic.h"
+#include "kernel.h"
 #include <arch/amd64/boot/gdt/gdt.h>
 #include <arch/amd64/exception/idt.h>
 #include <arch/amd64/memory/vmm.h>
 #include <arch/common/cpu/cpu.h>
 #include <limine/limine.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <sync/lock.h>
 #include <terminal/log.h>
 
@@ -25,8 +28,8 @@ static void core_init(struct limine_smp_info *info) {
   gdt_init();
   idt_init();
 
-  uint64_t *page_map_level_4 = vmm_init();
-  vmm_load((uintptr_t)(page_map_level_4)-vmm_get_direct_map_base());
+  vmm_load((uintptr_t)(kernel_task->root_page_table) - vmm_get_direct_map_base());
+
   release(&lock);
 
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
@@ -44,8 +47,9 @@ struct limine_smp_response *cpu_init() {
       continue;
     }
     /* Load GDT and IDT */
-    // smp_request.response->cpus[i]->goto_address = core_init;
+    smp_request.response->cpus[i]->goto_address = core_init;
   }
+
   return smp_request.response;
 }
 

@@ -10,6 +10,6 @@ typedef struct {
   struct virtual_memory_object_t *prev;
 } virtual_memory_object_t;
 
-page_descriptor_t *vmm_alloc_mem(uint64_t size, virtual_memory_object_t *object);
+void *vmm_alloc_mem(uint64_t size, virtual_memory_object_t *object, uintptr_t **pt_root, size_t flags);
 
-void vmm_free_mem(page_descriptor_t *page);
+void vmm_free_mem(void *ptr, virtual_memory_object_t *object, uintptr_t **pt_root);

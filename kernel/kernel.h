@@ -1,5 +1,6 @@
 #pragma once
 
+#include "task/task.h"
 #include <arch/common/device/pci/pci.h>
 #include <memory/pmm.h>
 
@@ -10,3 +11,5 @@
 #ifndef LOG_LEVEL
 #define LOG_LEVEL DEBUG
 #endif
+
+extern task_t *kernel_task;

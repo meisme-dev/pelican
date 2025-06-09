@@ -1,34 +1,67 @@
 #include "task.h"
+#include "arch/amd64/memory/vmm.h"
+#include "exception/panic.h"
+#include "kernel.h"
+#include "memory/pmm.h"
 
 #include <arch/common/memory/vmm.h>
+#include <stdatomic.h>
+#include <stdint.h>
 
 static size_t pid_counter = 0;
 
-typedef struct task_queue {
-  task_t *task;
-  struct task_queue *next;
-} task_queue;
+static task_t *task_head = NULL;
+static task_t *task_tail = NULL;
 
-static task_queue task_queue_head = {0};
+void task_init() {
+  kernel_task = task_add(0xf, 1);
+}
 
-void task_init(task_t *task) {
-  if (task == NULL) {
-    return;
+task_t *task_add(uint8_t priority, uint8_t privilege) {
+  page_descriptor_t *object_head_page = pmm_alloc_page();
+
+  if (object_head_page == NULL || object_head_page->base == 0) {
+    panic("OUT OF MEMORY");
   }
 
-  if (task_queue_head.task == NULL) {
-    task_queue_head.task = task;
-  } else {
-    task_queue *current_task = &task_queue_head;
-    while (current_task->next != NULL) {
-      current_task = current_task->next;
+  uintptr_t base = 0;
+
+  if (task_head == NULL) {
+    page_descriptor_t *page = pmm_alloc_page();
+    if (page == NULL || page->base == 0) {
+      panic("OUT OF MEMORY");
     }
-    current_task->task = task;
+
+    task_head = (void *)(page->base + vmm_get_direct_map_base());
+    task_tail = task_head;
   }
 
-  task->pid = pid_counter;
+  if (ROUND_UP((uintptr_t)task_head, PAGE_SIZE) - (uintptr_t)task_head > sizeof(task_t) ||
+      ROUND_UP((uintptr_t)task_head, PAGE_SIZE) == (uintptr_t)task_head) {
+    base = (uintptr_t)task_head + sizeof(virtual_memory_object_t);
+  } else {
+    page_descriptor_t *page = pmm_alloc_page();
+
+    if (page == NULL || page->base == 0) {
+      panic("OUT OF MEMORY");
+    }
+
+    base = page->base + vmm_get_direct_map_base();
+  }
+
+  task_t *new_task = (void *)base;
+
+  task_tail->next = (void *)new_task;
+  task_tail = (void *)task_tail->next;
+
+  new_task->pid = pid_counter;
+  new_task->memory_regions = (void *)(object_head_page->base + vmm_get_direct_map_base());
+  new_task->lock = (atomic_flag)ATOMIC_FLAG_INIT;
+  new_task->root_page_table = vmm_init();
+  new_task->priority = priority;
+  new_task->privilege = privilege;
+
   pid_counter++;
 
-  task->root_page_table = vmm_init();
-  //  task->context = ;
+  return new_task;
 }
