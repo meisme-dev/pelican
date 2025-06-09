@@ -1,3 +1,23 @@
 # Pelican
-### A small kernel for x86_64 machines
-![image](https://github.com/meisme-dev/pelican/assets/49573906/e946d384-7f31-4882-8e0a-5f8e45ff0232)
+A small kernel for x86_64 machines, written in C.
+
+### Roadmap
+- [x] SMP
+- [x] Paging
+- [ ] Scheduling (In Progress)
+- [ ] Filesystem
+- [ ] ELF Loading
+- [ ] Userspace
+- [ ] Driver Interface
+- [ ] LibC
+
+<details>
+<summary>
+  
+### Screenshots
+</summary>
+
+![image](https://github.com/user-attachments/assets/53cbde5b-b179-499c-8fc8-35167f3b41a9)
+![image](https://github.com/user-attachments/assets/d176bc39-4a11-4def-990e-208c4dd655b9)
+
+</details>
