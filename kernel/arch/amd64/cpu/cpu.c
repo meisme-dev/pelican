@@ -50,6 +50,8 @@ struct limine_smp_response *cpu_init() {
     smp_request.response->cpus[i]->goto_address = core_init;
   }
 
+  log_print(SUCCESS, "Initialized %u cores", smp_request.response->cpu_count);
+
   return smp_request.response;
 }
 

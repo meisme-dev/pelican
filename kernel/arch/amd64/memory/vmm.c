@@ -159,6 +159,8 @@ uintptr_t *vmm_init(void) {
     }
   }
 
+  log_print(SUCCESS, "Initialized Virtual Memory Manager");
+
   release(&lock);
 
   return (uintptr_t *)((uintptr_t)page_map_level_4);

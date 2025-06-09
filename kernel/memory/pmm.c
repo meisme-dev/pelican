@@ -123,9 +123,6 @@ struct limine_memmap_response *pmm_get_memmap(void) {
 
 page_descriptor_t *pmm_init(void) {
   pmm_allocate_list();
-  page_descriptor_t *current_page = page_head;
-  while (current_page->next) {
-    current_page = current_page->next;
-  }
+  log_print(SUCCESS, "Initialized Physical Memory Manager");
   return page_head;
 }

@@ -24,7 +24,7 @@ static struct log_level_info {
 
 void log_init(uint8_t log_level) {
   level = log_level;
-  log_print(SUCCESS, "Initialized logging");
+  log_print(SUCCESS, "Initialized Logger");
 }
 
 void log_print(log_level_t log_level, char *format, ...) {
@@ -33,6 +33,7 @@ void log_print(log_level_t log_level, char *format, ...) {
   va_list args;
   va_start(args, format);
   if (log_level < level) {
+    release(&lock);
     return;
   }
   for (int32_t i = sizeof(infos) / sizeof(struct log_level_info); i--;) {

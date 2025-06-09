@@ -3,6 +3,7 @@
 #include "exception/panic.h"
 #include "kernel.h"
 #include "memory/pmm.h"
+#include "terminal/log.h"
 
 #include <arch/common/memory/vmm.h>
 #include <stdatomic.h>
@@ -15,6 +16,7 @@ static task_t *task_tail = NULL;
 
 void task_init() {
   kernel_task = task_add(0xf, 1);
+  log_print(SUCCESS, "Created PID 0");
 }
 
 task_t *task_add(uint8_t priority, uint8_t privilege) {
