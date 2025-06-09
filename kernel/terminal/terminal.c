@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sync/lock.h>
@@ -108,6 +109,11 @@ void vprintf(char *format, va_list args) {
 
         case 'd':
           itoa(va_arg(args, int64_t), str, 10);
+          kputs(str);
+          break;
+
+        case 'i':
+          itoa(va_arg(args, int32_t), str, 10);
           kputs(str);
           break;
 
