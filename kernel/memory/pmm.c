@@ -15,35 +15,55 @@ static page_descriptor_t *page_head = NULL;
 static page_descriptor_t *page_tail = NULL;
 static uint64_t total_mem = 0;
 
-static void pmm_allocate_list(void) {
+uint64_t pmm_get_total_mem() {
+  if (total_mem != 0) {
+    return total_mem;
+  }
+
   for (size_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];
-
-    log_print(DEBUG, "(Memory map) Type: %u, Base, 0x%x, Size: 0x%x", current_entry->type, current_entry->base, current_entry->length);
 
     if (current_entry->type != LIMINE_MEMMAP_BAD_MEMORY &&
         current_entry->type != LIMINE_MEMMAP_RESERVED &&
         current_entry->type != LIMINE_MEMMAP_FRAMEBUFFER) {
       total_mem += current_entry->length;
     }
+  }
 
-    /* If the current entry is not usable, or not large enough, skip */
-    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length <= (current_entry->length / PAGE_SIZE) * sizeof(page_descriptor_t) + PAGE_SIZE) {
+  return total_mem;
+}
+
+static void pmm_allocate_list(void) {
+  uint64_t current_index = 0;
+
+  for (size_t i = 0; i < request.response->entry_count; i++) {
+    struct limine_memmap_entry *current_entry = request.response->entries[i];
+
+    log_print(DEBUG, "(Memory map) Type: %u, Base, 0x%x, Size: 0x%x", current_entry->type, current_entry->base, current_entry->length);
+
+    uint64_t mem = pmm_get_total_mem();
+
+    if (current_entry->type != LIMINE_MEMMAP_BAD_MEMORY &&
+        current_entry->type != LIMINE_MEMMAP_RESERVED &&
+        current_entry->type != LIMINE_MEMMAP_FRAMEBUFFER) {
+      mem += current_entry->length;
+    }
+
+    if (current_entry->type != LIMINE_MEMMAP_USABLE || current_entry->length < (mem / PAGE_SIZE) * sizeof(page_descriptor_t)) {
       continue;
     }
 
     uint64_t descriptor_count = current_entry->length / PAGE_SIZE;
-    page_descriptor_t *entry_page_head = (page_descriptor_t *)(current_entry->base + vmm_get_direct_map_base());
-
-    /* Zero out the first 2 descriptors to prevent garbage data */
-    memset(entry_page_head, 0, sizeof(page_descriptor_t));
-    memset(&entry_page_head[1], 0, sizeof(page_descriptor_t));
 
     /* If the current page descriptor is not initialized, set it to the first descriptor of this entry */
     if (page_head == NULL) {
-      page_head = entry_page_head;
-      page_head->next = (void *)((uintptr_t)(&entry_page_head[1]) + vmm_get_direct_map_base());
-      entry_page_head[1].prev = page_head;
+      page_head = (page_descriptor_t *)(current_entry->base + vmm_get_direct_map_base());
+
+      /* Zero out the first 2 descriptors to prevent garbage data */
+      memset(page_head, 0, sizeof(page_descriptor_t) * 2);
+
+      page_head->next = (void *)((uintptr_t)(&page_head[1]) + vmm_get_direct_map_base());
+      page_head[1].prev = page_head;
     }
 
     if (page_tail == NULL) {
@@ -53,11 +73,12 @@ static void pmm_allocate_list(void) {
     /* Get the last entry */
     page_descriptor_t *current_page_descriptor = page_tail;
 
-    for (size_t k = 0; k < descriptor_count; k++) {
-      page_descriptor_t *new_page_descriptor = &entry_page_head[k];
+    for (size_t k = current_index; k < descriptor_count + current_index; k++) {
+      page_descriptor_t *new_page_descriptor = &page_head[k];
       memset(new_page_descriptor, 0, sizeof(page_descriptor_t));
+
       /* Take into account the page descriptor size when setting the base */
-      new_page_descriptor->base = current_entry->base + (k * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
+      new_page_descriptor->base = (uintptr_t)page_head + (k * PAGE_SIZE) + ROUND_UP((sizeof(page_descriptor_t) * descriptor_count), PAGE_SIZE);
 
       /* Insert the new page descriptor */
       current_page_descriptor->next = new_page_descriptor;
@@ -65,6 +86,8 @@ static void pmm_allocate_list(void) {
       current_page_descriptor = new_page_descriptor;
       page_tail = new_page_descriptor;
     }
+
+    current_index += descriptor_count;
   }
 }
 
@@ -113,10 +136,6 @@ void pmm_free_page(void *addr) {
   release(&lock);
 }
 
-uint64_t pmm_get_total_mem(void) {
-  return total_mem;
-}
-
 struct limine_memmap_response *pmm_get_memmap(void) {
   return request.response;
 }
@@ -124,5 +143,6 @@ struct limine_memmap_response *pmm_get_memmap(void) {
 page_descriptor_t *pmm_init(void) {
   pmm_allocate_list();
   log_print(SUCCESS, "Initialized Physical Memory Manager");
+  log_print(INFO, "Detected memory: %u bytes", pmm_get_total_mem());
   return page_head;
 }

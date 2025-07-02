@@ -16,8 +16,13 @@ static volatile struct limine_hhdm_request hhdm_request = {.id = LIMINE_HHDM_REQ
 extern volatile uint64_t text_section_begin, text_section_end, rodata_section_begin, rodata_section_end, data_section_begin, data_section_end;
 
 static uintptr_t dynamic_memory_base = 0;
+static bool page_tables_initialized = false;
 
 uintptr_t vmm_get_direct_map_base() {
+  if (!page_tables_initialized) {
+    return 0;
+  }
+
   return hhdm_request.response->offset;
 }
 
@@ -160,8 +165,8 @@ uintptr_t *vmm_init(void) {
   }
 
   log_print(SUCCESS, "Initialized Virtual Memory Manager");
+  page_tables_initialized = true;
 
   release(&lock);
-
   return (uintptr_t *)((uintptr_t)page_map_level_4);
 }
