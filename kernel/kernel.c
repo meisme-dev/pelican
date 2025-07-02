@@ -15,7 +15,5 @@ void kmain(void) {
   task_init();
   cpu_init();
 
-  log_print(INFO, "Detected memory: %u bytes", pmm_get_total_mem());
-
   cpu_halt();
 }

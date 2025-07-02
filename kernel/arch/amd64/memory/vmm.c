@@ -123,7 +123,7 @@ uintptr_t *vmm_init(void) {
     panic("OUT OF MEMORY");
   }
 
-  uint64_t *page_map_level_4 = (void *)(page->base + vmm_get_direct_map_base());
+  uint64_t *page_map_level_4 = (void *)(page->base + hhdm_request.response->offset);
 
   uintptr_t text_begin = ROUND_DOWN((uintptr_t)&text_section_begin, PAGE_SIZE);
   uintptr_t rodata_begin = ROUND_DOWN((uintptr_t)&rodata_section_begin, PAGE_SIZE);
@@ -157,7 +157,7 @@ uintptr_t *vmm_init(void) {
 
     for (size_t j = 0; j < current_entry->length; j += PAGE_SIZE) {
       // vmm_map(current_entry->base + j, current_entry->base + j, 0b11, &page_map_level_4);
-      vmm_map(current_entry->base + j, current_entry->base + j + vmm_get_direct_map_base(), 0b11, &page_map_level_4);
+      vmm_map(current_entry->base + j, current_entry->base + j + hhdm_request.response->offset, 0b11, &page_map_level_4);
 
       /* Take into account any potential page table allocations */
       // dynamic_memory_base = (current_entry->base + j) * 2 + direct_map_base;
@@ -168,5 +168,5 @@ uintptr_t *vmm_init(void) {
   page_tables_initialized = true;
 
   release(&lock);
-  return (uintptr_t *)((uintptr_t)page_map_level_4);
+  return (uintptr_t *)((uintptr_t)page_map_level_4 - vmm_get_direct_map_base());
 }

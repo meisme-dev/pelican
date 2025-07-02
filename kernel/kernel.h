@@ -9,7 +9,7 @@
 #define ROUND(x, y) ROUND_UP(x, y) - x < x - ROUND_DOWN(x, y) ? ROUND_UP(x, y) : ROUND_DOWN(x, y)
 
 #ifndef LOG_LEVEL
-#define LOG_LEVEL DEBUG
+#define LOG_LEVEL INFO
 #endif
 
 extern task_t *kernel_task;

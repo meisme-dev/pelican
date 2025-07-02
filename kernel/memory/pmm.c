@@ -12,7 +12,6 @@
 
 static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
 static page_descriptor_t *page_head = NULL;
-static page_descriptor_t *page_tail = NULL;
 static uint64_t total_mem = 0;
 
 uint64_t pmm_get_total_mem() {
@@ -35,6 +34,7 @@ uint64_t pmm_get_total_mem() {
 
 static void pmm_allocate_list(void) {
   uint64_t current_index = 0;
+  page_descriptor_t *page_tail = NULL;
 
   for (size_t i = 0; i < request.response->entry_count; i++) {
     struct limine_memmap_entry *current_entry = request.response->entries[i];

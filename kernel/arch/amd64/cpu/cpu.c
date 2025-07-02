@@ -25,10 +25,10 @@ inline static void halt() {
 static void core_init(struct limine_smp_info *info) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
+
   gdt_init();
   idt_init();
-
-  vmm_load((uintptr_t)(kernel_task->root_page_table) - vmm_get_direct_map_base());
+  vmm_load((uintptr_t)(kernel_task->root_page_table));
 
   release(&lock);
 
