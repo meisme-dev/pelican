@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdint.h>
 #include <sync/lock.h>
 #include <video/framebuffer.h>
 
@@ -16,8 +17,11 @@ struct limine_framebuffer *framebuffer_create(void) {
 void put_pixel(uint32_t x, uint32_t y, uint32_t c, struct limine_framebuffer *fb) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
+
   if ((*(uintptr_t *)fb->address + x) + (y * fb->width) < *(uintptr_t *)fb->address + (fb->height * fb->width)) {
-    *(((uint32_t *)fb->address + x) + (y * fb->width)) = c;
+    uint32_t *pixel = (((uint32_t *)fb->address + x) + (y * fb->width));
+    *pixel = c;
   }
+
   release(&lock);
 }

@@ -10,36 +10,69 @@
 #include <video/framebuffer.h>
 
 extern char _binary____assets_bold_psf_start[];
+extern char _binary____assets_bold_psf_end[];
 extern char _binary____assets_regular_psf_start[];
+extern char _binary____assets_regular_psf_end[];
+extern uint32_t _binary____assets_bg_rgb_start[];
+extern uint32_t _binary____assets_bg_rgb_end[];
 
 #define PADDING 0
+#define BOLD false
+#define FG 0xbababa
+#define BG 0x000000
+
+#define BG_WIDTH 960.0
+#define BG_HEIGHT 540.0
 
 struct limine_framebuffer *framebuffer;
 
-static uint32_t x = 0, y = 0, fg = 0xffffff, bg = 0;
+static uint32_t x = 0, y = 0, fg = FG, bg = BG;
 static psf_font_t *psf_font;
 static atomic_flag locks[4] = {ATOMIC_FLAG_INIT};
 
 bool terminal_init(void) {
   framebuffer = framebuffer_create();
+
   if (framebuffer == NULL) {
     return false;
   }
-  set_bold(false);
-  log_print(SUCCESS, "Initialized Terminal");
+
+  set_bold(BOLD);
+  log_print(OK, "Initialized terminal");
   return true;
+}
+
+void reset_format(void) {
+  acquire(&locks[1]);
+  set_color(BG, FG);
+  set_bold(BOLD);
+  release(&locks[1]);
+}
+
+void get_defaults(uint32_t *nbg, uint32_t *nfg, bool *nb) {
+  if (nbg != NULL) {
+    *nbg = BG;
+  }
+
+  if (nfg != NULL) {
+    *nfg = FG;
+  }
+
+  if (nb != NULL) {
+    *nb = BOLD;
+  }
 }
 
 void set_bold(bool bold) {
   acquire(&locks[0]);
   if (bold) {
     psf_font = (psf_font_t *)&_binary____assets_bold_psf_start;
-    psf_init((psf_font_t *)&_binary____assets_bold_psf_start);
+    psf_init((psf_font_t *)&_binary____assets_bold_psf_start, (psf_font_t *)&_binary____assets_bold_psf_end);
     release(&locks[0]);
     return;
   }
   psf_font = (psf_font_t *)&_binary____assets_regular_psf_start;
-  psf_init((psf_font_t *)&_binary____assets_regular_psf_start);
+  psf_init((psf_font_t *)&_binary____assets_regular_psf_start, (psf_font_t *)&_binary____assets_regular_psf_end);
   release(&locks[0]);
 }
 
@@ -50,7 +83,7 @@ void reset_pos(void) {
   release(&locks[0]);
 }
 
-void set_col(uint32_t nbg, uint32_t nfg) {
+void set_color(uint32_t nbg, uint32_t nfg) {
   acquire(&locks[0]);
   bg = nbg;
   fg = nfg;
@@ -144,3 +177,8 @@ void _trace(const char *file, size_t line) {
   printf("At %s:%d:\n", file, line);
   release(&locks[0]);
 }
+
+#undef PADDING
+#undef BG
+#undef FG
+#undef BOLD

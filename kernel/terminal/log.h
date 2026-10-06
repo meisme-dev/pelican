@@ -3,15 +3,12 @@
 #include <stdint.h>
 
 typedef enum {
-  DEBUG,
-  VERBOSE,
-  MESSAGE,
+  SYSTEM,
   INFO,
-  SUCCESS,
-  FAILURE,
-  WARNING,
-  ERROR,
-  FATAL
+  OK,
+  FAIL,
+  WARN,
+  HALT
 } log_level_t;
 
 void log_init(uint8_t log_level);

@@ -4,9 +4,10 @@ set -e
 
 BINUTILS_VERSION="2.41"
 GCC_VERSION="13.2.0"
+BASEURL="https://ftp.rediris.es/mirror/GNU"
 
-BINUTILS_URL="https://ftp.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.xz"
-GCC_URL="https://ftp.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.xz"
+BINUTILS_URL="$BASEURL/binutils/binutils-$BINUTILS_VERSION.tar.xz"
+GCC_URL="$BASEURL/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.xz"
 CORES=$(nproc)
 TARGET=x86_64-elf
 PREFIX=$(readlink -f toolchain)

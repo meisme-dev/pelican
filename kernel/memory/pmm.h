@@ -7,14 +7,12 @@
 #define PAGE_SIZE 4096
 
 typedef struct page_descriptor_t {
-  uint64_t base;
   struct page_descriptor_t *next;
-  struct page_descriptor_t *prev;
 } page_descriptor_t;
 
 page_descriptor_t *pmm_init(void);
 
-page_descriptor_t *pmm_alloc_page(void);
+void *pmm_alloc_page(void);
 
 uint64_t pmm_get_total_mem(void);
 

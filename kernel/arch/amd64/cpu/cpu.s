@@ -1,7 +1,5 @@
 .intel_syntax noprefix
 
-.section text
-
 .global cpu_rdmsr
 .type cpu_rdmsr, @function
 cpu_rdmsr:
@@ -20,3 +18,26 @@ cpu_wrmsr:
   wrmsr
   ret
 
+.global cpu_enable_sse
+.type cpu_enable_sse, @function
+cpu_enable_sse:
+  mov rax, cr4
+  bts rax, 9
+  bts rax, 10
+  mov cr4, rax
+  ret
+
+.global cpu_enable_avx
+.type cpu_enable_avx, @function
+cpu_enable_avx:
+  push rax
+  push rcx
+  push rdx
+  xor rcx, rcx
+  xgetbv
+  or eax, 7
+  xsetbv
+  pop rdx
+  pop rcx
+  pop rax
+  ret

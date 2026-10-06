@@ -11,9 +11,9 @@ void _panic(const char *file, size_t line, char *format, ...) {
 
   va_list args;
 
-  for (uint32_t i = 0; i < framebuffer->height * framebuffer->width; i++) {
-    if (((uint32_t *)(framebuffer->address))[i] == 0x0) {
-      ((uint32_t *)(framebuffer->address))[i] = 0xff0000;
+  for (uint32_t x = 0; x < framebuffer->width; x++) {
+    for (uint32_t y = 0; y < framebuffer->height; y++) {
+      put_pixel(x, y, 0x80ff0000, framebuffer);
     }
   }
 

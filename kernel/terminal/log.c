@@ -1,10 +1,12 @@
 #include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
 #include <sync/lock.h>
 #include <terminal/log.h>
 #include <terminal/terminal.h>
 
 #define LOG_LEVEL_INFO(log_level, color) \
-  {log_level, "[" #log_level "] ", color}
+  {log_level, #log_level, color}
 
 static uint8_t level = 4;
 static struct log_level_info {
@@ -12,19 +14,16 @@ static struct log_level_info {
   char *name;
   uint32_t color;
 } infos[] = {
-    LOG_LEVEL_INFO(VERBOSE, 0x777777),
-    LOG_LEVEL_INFO(DEBUG, 0xaa5555),
-    LOG_LEVEL_INFO(MESSAGE, 0x77aaff),
+    LOG_LEVEL_INFO(SYSTEM, 0xaa5555),
     LOG_LEVEL_INFO(INFO, 0x3399ff),
-    LOG_LEVEL_INFO(SUCCESS, 0x44aa88),
-    LOG_LEVEL_INFO(FAILURE, 0xaa4444),
-    LOG_LEVEL_INFO(WARNING, 0xffff00),
-    LOG_LEVEL_INFO(ERROR, 0xff4400),
-    LOG_LEVEL_INFO(FATAL, 0xff0000)};
+    LOG_LEVEL_INFO(OK, 0x44aa88),
+    LOG_LEVEL_INFO(FAIL, 0xaa4444),
+    LOG_LEVEL_INFO(WARN, 0xffff00),
+    LOG_LEVEL_INFO(HALT, 0xff0000)};
 
 void log_init(uint8_t log_level) {
   level = log_level;
-  log_print(SUCCESS, "Initialized Logger");
+  log_print(OK, "Initialized logger");
 }
 
 void log_print(log_level_t log_level, char *format, ...) {
@@ -38,14 +37,32 @@ void log_print(log_level_t log_level, char *format, ...) {
   }
   for (int32_t i = sizeof(infos) / sizeof(struct log_level_info); i--;) {
     if (infos[i].log_level == log_level) {
-      set_col(0x0, infos[i].color);
-      // TODO: Retain state
+      uint8_t info_len = strlen(infos[i].name);
+      uint8_t space_count = 6 - info_len;
+      uint32_t bg = 0, fg = 0;
+      bool bold = false;
+
+      get_defaults(&bg, &fg, &bold);
+
       set_bold(true);
+      kputchar('[');
+
+      for (uint8_t j = 0; j < space_count / 2; j++) {
+        kputchar(' ');
+      }
+
+      set_color(bg, infos[i].color);
       kputs(infos[i].name);
-      set_bold(false);
+      set_color(bg, fg);
+
+      for (uint8_t j = 0; j < space_count / 2; j++) {
+        kputchar(' ');
+      }
+
+      kputs("] ");
+      set_bold(bold);
     }
   }
-  set_col(0x0, 0xffffff);
   vprintf(format, args);
   puts("");
   va_end(args);

@@ -1,4 +1,5 @@
-#include "exception/panic.h"
+// #include "arch/amd64/cpu/acpi/acpi.h"
+#include "arch/amd64/cpu/cpu.h"
 #include "kernel.h"
 #include <arch/amd64/boot/gdt/gdt.h>
 #include <arch/amd64/exception/idt.h>
@@ -22,19 +23,27 @@ inline static void halt() {
   }
 }
 
+void cpu_enable_features() {
+  cpu_enable_sse();
+  // cpu_enable_avx();
+}
+
 static void core_init(struct limine_smp_info *info) {
   static atomic_flag lock = ATOMIC_FLAG_INIT;
   acquire(&lock);
-
   gdt_init();
   idt_init();
-  vmm_load((uintptr_t)(kernel_task->root_page_table));
+  vmm_load(((uintptr_t)kernel_task->root_page_table) - vmm_get_direct_map_base());
 
   release(&lock);
 
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
     return;
   }
+
+  cpu_enable_features();
+
+  log_print(INFO, "Core %u done", info->lapic_id);
 
   halt(); /* TODO: Replace this with scheduler call when scheduler is implemented */
 }
@@ -50,7 +59,7 @@ struct limine_smp_response *cpu_init() {
     smp_request.response->cpus[i]->goto_address = core_init;
   }
 
-  log_print(SUCCESS, "Initialized %u cores", smp_request.response->cpu_count);
+  log_print(INFO, "Initializing %u cores", smp_request.response->cpu_count);
 
   return smp_request.response;
 }

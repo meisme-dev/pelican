@@ -1,6 +1,7 @@
 #pragma once
 
-#include "pmm.h"
+#include <stddef.h>
+#include <stdint.h>
 
 typedef struct {
   size_t base;

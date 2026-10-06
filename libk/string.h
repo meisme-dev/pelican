@@ -7,4 +7,6 @@ char *strcat(char *dst, const char *src);
 char *strncat(char *dst, const char *src, size_t n);
 char *strcpy(char *dst, const char *src);
 char *strncpy(char *dst, const char *src, size_t n);
+int strcmp(const char *str1, const char *str2);
+int strncmp(const char *str1, const char *str2, size_t n);
 void *memset(void *ptr, int value, size_t n);

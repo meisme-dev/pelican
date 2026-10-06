@@ -4,3 +4,5 @@
 toolchain/
 sysroot/
 build/
+
+qemu.log

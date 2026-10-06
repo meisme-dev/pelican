@@ -46,6 +46,24 @@ char *strncpy(char *dst, const char *src, size_t n) {
   return tmp;
 }
 
+int strcmp(const char *str1, const char *str2) {
+  while (*str1 != '0' && *str2 != '0' && *str1 == *str2) {
+    str1++;
+    str2++;
+  }
+
+  return *str1 - *str2;
+}
+
+int strncmp(const char *str1, const char *str2, size_t n) {
+  while (*str1 != '0' && *str2 != '0' && *str1 == *str2 && n--) {
+    str1++;
+    str2++;
+  }
+
+  return *str1 - *str2;
+}
+
 void *memset(void *ptr, int value, size_t n) {
   unsigned char *b = ptr;
   do {

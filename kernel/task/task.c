@@ -1,13 +1,14 @@
 #include "task.h"
-#include "arch/amd64/memory/vmm.h"
 #include "exception/panic.h"
 #include "kernel.h"
 #include "memory/pmm.h"
+#include "memory/vmm.h"
 #include "terminal/log.h"
 
 #include <arch/common/memory/vmm.h>
 #include <stdatomic.h>
 #include <stdint.h>
+#include <string.h>
 
 static size_t pid_counter = 0;
 
@@ -16,13 +17,13 @@ static task_t *task_tail = NULL;
 
 void task_init() {
   kernel_task = task_add(0xf, 1);
-  log_print(SUCCESS, "Created PID 0");
+  log_print(OK, "Created PID 0");
 }
 
 task_t *task_add(uint8_t priority, uint8_t privilege) {
-  page_descriptor_t *object_head_page = pmm_alloc_page();
+  virtual_memory_object_t *object_head_page = pmm_alloc_page();
 
-  if (object_head_page == NULL || object_head_page->base == 0) {
+  if (object_head_page == NULL) {
     panic("OUT OF MEMORY");
   }
 
@@ -30,11 +31,11 @@ task_t *task_add(uint8_t priority, uint8_t privilege) {
 
   if (task_head == NULL) {
     page_descriptor_t *page = pmm_alloc_page();
-    if (page == NULL || page->base == 0) {
+    if (page == NULL) {
       panic("OUT OF MEMORY");
     }
 
-    task_head = (void *)(page->base + vmm_get_direct_map_base());
+    task_head = (void *)(page);
     task_tail = task_head;
   }
 
@@ -44,11 +45,11 @@ task_t *task_add(uint8_t priority, uint8_t privilege) {
   } else {
     page_descriptor_t *page = pmm_alloc_page();
 
-    if (page == NULL || page->base == 0) {
+    if (page == NULL) {
       panic("OUT OF MEMORY");
     }
 
-    base = page->base + vmm_get_direct_map_base();
+    base = (uintptr_t)page;
   }
 
   task_t *new_task = (void *)base;
@@ -57,7 +58,7 @@ task_t *task_add(uint8_t priority, uint8_t privilege) {
   task_tail = (void *)task_tail->next;
 
   new_task->pid = pid_counter;
-  new_task->memory_regions = (void *)(object_head_page->base + vmm_get_direct_map_base());
+  new_task->memory_regions = (void *)(object_head_page);
   new_task->lock = (atomic_flag)ATOMIC_FLAG_INIT;
   new_task->root_page_table = vmm_init();
   new_task->priority = priority;

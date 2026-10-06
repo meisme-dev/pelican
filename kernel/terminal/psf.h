@@ -1,6 +1,9 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
+
+#define PSF_FONT_MAGIC 0x864ab572
 
 typedef struct {
   uint32_t magic;
@@ -14,4 +17,4 @@ typedef struct {
 } psf_font_t;
 
 void psf_putchar(uint16_t character, uint32_t *cx, uint32_t *cy, uint32_t fg, uint32_t bg);
-void psf_init(psf_font_t *font);
+void psf_init(psf_font_t *font, psf_font_t *end);

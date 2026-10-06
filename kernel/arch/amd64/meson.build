@@ -1,14 +1,15 @@
-arch_sources = files([
+arch_sources = files(
+  'boot/gdt/gdt.c',
+  # 'cpu/acpi/acpi.c',
+  'boot/gdt/gdt.s',
   'cpu/cpu.c',
   'cpu/cpu.s',
-  'boot/gdt/gdt.s',
-  'exception/idt.s',
-  'boot/gdt/gdt.c',
-  'exception/idt.c',
-  'io/serial/serial.c',
-  'memory/vmm.s',
-  'memory/vmm.c',
-  'task/task.c',
-  'io/io.c',
   'device/pci/pci.c',
-])
+  'exception/idt.c',
+  'exception/idt.s',
+  'io/io.c',
+  'io/serial/serial.c',
+  'memory/vmm.c',
+  'memory/vmm.s',
+  'task/task.c',
+)
