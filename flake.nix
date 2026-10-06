@@ -23,7 +23,6 @@
               meson
               ninja
               gcc
-              gcc_multi
               libtool
               gnumake
               bison
@@ -32,7 +31,6 @@
               xorriso
               qemu
               clang-tools
-              gnu-efi
             ]
             ++ lib.optional stdenv.isx86_64 [
               OVMF
