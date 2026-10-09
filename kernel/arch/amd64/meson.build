@@ -1,6 +1,7 @@
 arch_sources = files(
   'boot/gdt/gdt.c',
   # 'cpu/acpi/acpi.c',
+  'boot/acpi/acpi.c',
   'boot/gdt/gdt.s',
   'cpu/cpu.c',
   'cpu/cpu.s',

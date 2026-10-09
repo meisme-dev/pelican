@@ -9,7 +9,7 @@
 #include <terminal/log.h>
 #include <terminal/terminal.h>
 
-static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 0};
+static volatile struct limine_memmap_request request = {.id = LIMINE_MEMMAP_REQUEST, .revision = 6};
 static page_descriptor_t *page_head = NULL;
 static uint64_t total_mem = 0;
 

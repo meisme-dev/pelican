@@ -5,7 +5,7 @@
 
 static volatile struct limine_framebuffer_request request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST,
-    .revision = 0};
+    .revision = 6};
 
 struct limine_framebuffer *framebuffer_create(void) {
   if (request.response == NULL || request.response->framebuffer_count < 1) {

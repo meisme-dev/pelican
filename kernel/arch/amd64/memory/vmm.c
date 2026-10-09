@@ -10,8 +10,8 @@
 #include <sync/lock.h>
 #include <terminal/log.h>
 
-static volatile struct limine_kernel_address_request kernel_address_request = {.id = LIMINE_KERNEL_ADDRESS_REQUEST, .revision = 0};
-static volatile struct limine_hhdm_request hhdm_request = {.id = LIMINE_HHDM_REQUEST, .revision = 0};
+static volatile struct limine_kernel_address_request kernel_address_request = {.id = LIMINE_KERNEL_ADDRESS_REQUEST, .revision = 6};
+static volatile struct limine_hhdm_request hhdm_request = {.id = LIMINE_HHDM_REQUEST, .revision = 6};
 
 extern volatile uint64_t text_section_begin, text_section_end, rodata_section_begin, rodata_section_end, data_section_begin, data_section_end;
 
@@ -132,15 +132,15 @@ uintptr_t *vmm_init(void) {
   dynamic_memory_base = data_end;
 
   for (size_t i = text_begin; i < text_end; i += PAGE_SIZE) {
-    vmm_map(i - kernel_address_response->virtual_base + kernel_address_response->physical_base, i, 0b01, &page_map_level_4); // Read + Present
+    vmm_map(i - kernel_address_response->virtual_base + kernel_address_response->physical_base, i, VMM_FLAG_PRESENT, &page_map_level_4); // Read + Present
   }
 
   for (size_t i = rodata_begin; i < rodata_end; i += PAGE_SIZE) {
-    vmm_map(i - kernel_address_response->virtual_base + kernel_address_response->physical_base, i, 0b01, &page_map_level_4); // Read + Present
+    vmm_map(i - kernel_address_response->virtual_base + kernel_address_response->physical_base, i, VMM_FLAG_PRESENT, &page_map_level_4); // Read + Present
   }
 
   for (size_t i = data_begin; i < data_end; i += PAGE_SIZE) {
-    vmm_map(i - kernel_address_response->virtual_base + kernel_address_response->physical_base, i, 0b11, &page_map_level_4); // Read/Write + Present
+    vmm_map(i - kernel_address_response->virtual_base + kernel_address_response->physical_base, i, VMM_FLAG_READ_WRITE | VMM_FLAG_PRESENT, &page_map_level_4); // Read/Write + Present
   }
 
   struct limine_memmap_response *response = pmm_get_memmap();
@@ -153,8 +153,8 @@ uintptr_t *vmm_init(void) {
     }
 
     for (size_t j = 0; j < current_entry->length; j += PAGE_SIZE) {
-      vmm_map(current_entry->base + j, current_entry->base + j, 0b11, &page_map_level_4);
-      vmm_map(current_entry->base + j, current_entry->base + j + hhdm_request.response->offset, 0b11, &page_map_level_4);
+      vmm_map(current_entry->base + j, current_entry->base + j, VMM_FLAG_READ_WRITE | VMM_FLAG_PRESENT, &page_map_level_4);
+      vmm_map(current_entry->base + j, current_entry->base + j + hhdm_request.response->offset, VMM_FLAG_READ_WRITE | VMM_FLAG_PRESENT, &page_map_level_4);
     }
   }
   log_print(OK, "Initialized virtual memory manager");

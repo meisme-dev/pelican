@@ -1,5 +1,6 @@
 // #include "arch/amd64/cpu/acpi/acpi.h"
 #include "arch/amd64/cpu/cpu.h"
+#include "arch/amd64/boot/acpi/acpi.h"
 #include "kernel.h"
 #include <arch/amd64/boot/gdt/gdt.h>
 #include <arch/amd64/exception/idt.h>
@@ -13,7 +14,7 @@
 
 volatile struct limine_smp_request smp_request = {
     .id = LIMINE_SMP_REQUEST,
-    .revision = 0,
+    .revision = 6,
     .flags = 1,
 };
 
@@ -25,7 +26,6 @@ inline static void halt() {
 
 void cpu_enable_features() {
   cpu_enable_sse();
-  // cpu_enable_avx();
 }
 
 static void core_init(struct limine_smp_info *info) {
@@ -34,16 +34,16 @@ static void core_init(struct limine_smp_info *info) {
   gdt_init();
   idt_init();
   vmm_load(((uintptr_t)kernel_task->root_page_table) - vmm_get_direct_map_base());
-
   release(&lock);
 
   if (info->lapic_id == 0) { /* Don't halt main CPU yet */
+    acpi_init();
     return;
   }
 
   cpu_enable_features();
 
-  log_print(INFO, "Core %u done", info->lapic_id);
+  log_print(SYSTEM, "Core %u done", info->lapic_id);
 
   halt(); /* TODO: Replace this with scheduler call when scheduler is implemented */
 }

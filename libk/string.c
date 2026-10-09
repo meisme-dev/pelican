@@ -47,21 +47,26 @@ char *strncpy(char *dst, const char *src, size_t n) {
 }
 
 int strcmp(const char *str1, const char *str2) {
-  while (*str1 != '0' && *str2 != '0' && *str1 == *str2) {
+  while (*str1 != '0' && *str2 != '\0' && *str1 == *str2) {
     str1++;
     str2++;
   }
 
-  return *str1 - *str2;
+  return (unsigned char)*str1 - (unsigned char)*str2;
 }
 
 int strncmp(const char *str1, const char *str2, size_t n) {
-  while (*str1 != '0' && *str2 != '0' && *str1 == *str2 && n--) {
-    str1++;
-    str2++;
+  if (n == 0) {
+    return 0;
   }
 
-  return *str1 - *str2;
+  while (*str1 && *str1 == *str2 && n > 1) {
+    str1++;
+    str2++;
+    n--;
+  }
+
+  return (unsigned char)*str1 - (unsigned char)*str2;
 }
 
 void *memset(void *ptr, int value, size_t n) {
@@ -71,4 +76,30 @@ void *memset(void *ptr, int value, size_t n) {
     b++;
   } while (n-- > 0);
   return ptr;
+}
+
+void *memmove(void *dest, const void *src, size_t n) {
+  const char *s = (const char *)src;
+  char *d = (char *)dest;
+
+  if (d == s) {
+    return dest;
+  }
+
+  if (d > s) {
+    s += n;
+    d += n;
+
+    while (n--) {
+      *--d = *--s;
+    }
+
+    return dest;
+  }
+
+  while (n--) {
+    *d++ = *s++;
+  }
+
+  return dest;
 }

@@ -28,7 +28,7 @@ struct limine_framebuffer *framebuffer;
 
 static uint32_t x = 0, y = 0, fg = FG, bg = BG;
 static psf_font_t *psf_font;
-static atomic_flag locks[4] = {ATOMIC_FLAG_INIT};
+static atomic_flag locks[2] = {ATOMIC_FLAG_INIT};
 
 bool terminal_init(void) {
   framebuffer = framebuffer_create();
@@ -63,6 +63,18 @@ void get_defaults(uint32_t *nbg, uint32_t *nfg, bool *nb) {
   }
 }
 
+void terminal_scroll(uint32_t n) {
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
+  memmove(framebuffer->address, (uint32_t *)framebuffer->address + framebuffer->width * n, (framebuffer->width * framebuffer->height - framebuffer->width * n) * (framebuffer->bpp / 8));
+  for (uint32_t i = 0; i < n; i++) {
+    for (uint32_t j = 0; j < framebuffer->width; j++) {
+      put_pixel(j, framebuffer->height - i, bg, framebuffer);
+    }
+  }
+  release(&lock);
+}
+
 void set_bold(bool bold) {
   acquire(&locks[0]);
   if (bold) {
@@ -91,24 +103,31 @@ void set_color(uint32_t nbg, uint32_t nfg) {
 }
 
 void kputchar(const char c) {
-  acquire(&locks[3]);
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
   if (c == '\n') {
-    y += psf_font->height;
+    if (y >= framebuffer->height - psf_font->height) {
+      y = framebuffer->height - psf_font->height;
+      terminal_scroll(psf_font->height);
+    } else {
+      y += psf_font->height;
+    }
     x = 0;
-    release(&locks[3]);
+    release(&lock);
     return;
   }
   psf_putchar(c, &x, &y, fg, bg);
-  release(&locks[3]);
+  release(&lock);
 }
 
 void kputs(const char *c) {
-  acquire(&locks[2]);
+  static atomic_flag lock = ATOMIC_FLAG_INIT;
+  acquire(&lock);
   while (*c != '\0') {
     kputchar(*c);
     c++;
   }
-  release(&locks[2]);
+  release(&lock);
 }
 
 void puts(const char *str) {

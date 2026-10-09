@@ -26,5 +26,5 @@ typedef struct {
   struct task *next;
 } task_t;
 
-task_t *task_add(uint8_t priority, uint8_t privilege);
+task_t *task_add(uint8_t priority, uint8_t privilege, uintptr_t *root_page_table);
 void task_init();

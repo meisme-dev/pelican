@@ -16,11 +16,11 @@ static task_t *task_head = NULL;
 static task_t *task_tail = NULL;
 
 void task_init() {
-  kernel_task = task_add(0xf, 1);
+  kernel_task = task_add(0xf, 1, vmm_init());
   log_print(OK, "Created PID 0");
 }
 
-task_t *task_add(uint8_t priority, uint8_t privilege) {
+task_t *task_add(uint8_t priority, uint8_t privilege, uintptr_t *root_page_table) {
   virtual_memory_object_t *object_head_page = pmm_alloc_page();
 
   if (object_head_page == NULL) {
@@ -60,7 +60,7 @@ task_t *task_add(uint8_t priority, uint8_t privilege) {
   new_task->pid = pid_counter;
   new_task->memory_regions = (void *)(object_head_page);
   new_task->lock = (atomic_flag)ATOMIC_FLAG_INIT;
-  new_task->root_page_table = vmm_init();
+  new_task->root_page_table = root_page_table;
   new_task->priority = priority;
   new_task->privilege = privilege;
 

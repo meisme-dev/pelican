@@ -13,12 +13,17 @@ void _panic(const char *file, size_t line, char *format, ...) {
 
   for (uint32_t x = 0; x < framebuffer->width; x++) {
     for (uint32_t y = 0; y < framebuffer->height; y++) {
-      put_pixel(x, y, 0x80ff0000, framebuffer);
+      if ((*(uintptr_t *)framebuffer->address + x) + (y * framebuffer->width) < *(uintptr_t *)framebuffer->address + (framebuffer->height * framebuffer->width) && *(((uint32_t *)framebuffer->address + x) + (y * framebuffer->width)) > 0) {
+        uint32_t *pixel = (((uint32_t *)framebuffer->address + x) + (y * framebuffer->width));
+        *pixel = 0xff0000;
+      }
     }
   }
 
   va_start(args, format);
   set_bold(true);
+  reset_pos();
+  set_color(0xff0000, 0xffffff);
 
   printf("KERNEL PANIC FROM %s:%d:\n", file, line);
   vprintf(format, args);
