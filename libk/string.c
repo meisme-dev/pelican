@@ -40,9 +40,13 @@ char *strcpy(char *dst, const char *src) {
 
 char *strncpy(char *dst, const char *src, size_t n) {
   char *tmp = dst;
-  while ((*dst++ = *src++) && n--)
-    ;
-  *tmp = '\0';
+
+  while (n > 0 && *src) {
+    *dst++ = *src++;
+    n--;
+  }
+
+  *dst = '\0';
   return tmp;
 }
 

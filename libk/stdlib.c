@@ -25,6 +25,19 @@ void itoa(int64_t x, char *str, uint32_t base) {
   }
 }
 
+// TODO: handle edge cases
+int atoi(const char *str) {
+  int i = 0;
+  int ret = 0;
+  while (str[i] >= '0' && str[i] <= '9') {
+    int n = str[i] - '0';
+    ret = ret * 10 + n;
+    i++;
+  }
+
+  return ret;
+}
+
 void utoa(size_t x, char *str, uint32_t base) {
   size_t i = 0;
   str[0] = '0';

@@ -22,7 +22,7 @@ rsdp_t *rsdp_init() {
   }
 
   if (strncmp("RSD PTR", ((xsdp_t *)addr)->rsdp.sig, 7)) {
-    panic("Invalid XSDP/RSDP, signature %s", ((xsdp_t *)addr)->rsdp.sig);
+    panic("Invalid XSDP/RSDP, signature %.4s", ((xsdp_t *)addr)->rsdp.sig);
   }
 
   if ((sum & 0xFF) != 0) {
@@ -40,7 +40,7 @@ static acpi_sdt_header_t *find_sdt(rsdt_t *rsdt, const char *sig, uint8_t rev) {
   for (uint32_t i = 0; i < entries; i++) {
     acpi_sdt_header_t *header = rev >= 2 ? (acpi_sdt_header_t *)((xsdt_t *)rsdt)->sdt_ptr[i] : (acpi_sdt_header_t *)(uintptr_t)(rsdt)->sdt_ptr[i];
     if (!strncmp(sig, header->sig, 4)) {
-      log_print(SYSTEM, "SDT found with signature %s", header->sig);
+      log_print(SYSTEM, "SDT found with signature %.4s", header->sig);
       return header;
     }
   }
@@ -61,7 +61,7 @@ void acpi_init() {
     madt = (void *)find_sdt(rsdt, "APIC", rsdp->rev);
   }
 
-  void *lapic = (void *)((uintptr_t)madt->addr);
+  void *lapic = NULL;
   uint8_t *end = (uint8_t *)madt + madt->header.len;
   for (uint8_t *cur = madt->records; cur < end; cur += cur[1]) {
     switch (cur[0]) {

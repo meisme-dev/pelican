@@ -149,40 +149,52 @@ void printf(char *format, ...) {
 void vprintf(char *format, va_list args) {
   acquire(&locks[1]);
   char *ptr = format;
+  int n = 0, next = 0;
+
   while (*ptr) {
-    if (*ptr == '%') {
-      char str[65] = {' '};
-      str[64] = '\0';
+    if (*ptr == '%' || next) {
+      char str[64] = {' '};
+      str[63] = '\0';
+      next = 0;
       ptr++;
-      switch (*ptr++) {
-        case 's':
+      if (*ptr == 's') {
+        if (n > 0 && n < 64) {
+          strncpy(str, va_arg(args, char *), n);
+          kputs(str);
+          n = 0;
+        } else {
           kputs(va_arg(args, char *));
-          break;
+        }
+        ptr++;
+      } else if (*ptr == 'd') {
+        itoa(va_arg(args, int64_t), str, 10);
+        kputs(str);
+        ptr++;
+      } else if (*ptr == 'i') {
+        itoa(va_arg(args, int32_t), str, 10);
+        kputs(str);
+        ptr++;
+      } else if (*ptr == 'u') {
+        utoa(va_arg(args, uint64_t), str, 10);
+        kputs(str);
+        ptr++;
+      } else if (*ptr == 'x') {
+        utoa(va_arg(args, uint64_t), str, 16);
+        kputs(str);
+        ptr++;
+      } else if (*ptr == 'b') {
+        utoa(va_arg(args, uint64_t), str, 2);
+        kputs(str);
+        ptr++;
+      } else if (*ptr == '.') {
+        if (*ptr == '*') {
+          n = va_arg(args, int);
+        } else {
+          n = atoi(&ptr[1]);
+        }
 
-        case 'd':
-          itoa(va_arg(args, int64_t), str, 10);
-          kputs(str);
-          break;
-
-        case 'i':
-          itoa(va_arg(args, int32_t), str, 10);
-          kputs(str);
-          break;
-
-        case 'u':
-          utoa(va_arg(args, uint64_t), str, 10);
-          kputs(str);
-          break;
-
-        case 'x':
-          utoa(va_arg(args, uint64_t), str, 16);
-          kputs(str);
-          break;
-
-        case 'b':
-          utoa(va_arg(args, uint64_t), str, 2);
-          kputs(str);
-          break;
+        next = 1;
+        ptr++;
       }
     } else {
       kputchar(*ptr++);
