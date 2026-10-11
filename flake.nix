@@ -13,6 +13,7 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        pkgsLinux_x86_64 = nixpkgs.legacyPackages.x86_64-linux;
       in
       {
         devShell = pkgs.mkShell {
@@ -31,18 +32,13 @@
               xorriso
               qemu
               clang-tools
-            ]
-            ++ lib.optional stdenv.isx86_64 [
-              OVMF
             ];
 
           shellHook = ''
             export PATH="$(readlink -f toolchain)/bin:$PATH"
             export CC=${pkgs.gcc}/bin/gcc
             export CXX=${pkgs.gcc}/bin/g++
-          ''
-          + pkgs.lib.optionalString pkgs.stdenv.isx86_64 ''
-            export OVMF_PATH=${pkgs.OVMF.fd}/FV/OVMF.fd
+            export OVMF_PATH=${pkgsLinux_x86_64.OVMF.fd}/FV/OVMF.fd
           '';
         };
       }
