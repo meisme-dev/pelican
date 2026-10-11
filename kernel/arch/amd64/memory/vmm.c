@@ -149,6 +149,10 @@ uintptr_t *vmm_init(void) {
     struct limine_memmap_entry *current_entry = response->entries[i];
 
     if (current_entry->type == LIMINE_MEMMAP_RESERVED || current_entry->type == LIMINE_MEMMAP_BAD_MEMORY || current_entry->type == LIMINE_MEMMAP_KERNEL_AND_MODULES) {
+      for (size_t j = 0; j < current_entry->length; j += PAGE_SIZE) {
+        vmm_map(current_entry->base + j, current_entry->base + j, VMM_FLAG_PRESENT, &page_map_level_4);
+        vmm_map(current_entry->base + j, current_entry->base + j + hhdm_request.response->offset, VMM_FLAG_PRESENT, &page_map_level_4);
+      }
       continue;
     }
 

@@ -41,6 +41,10 @@ typedef struct __attribute__((packed)) {
   char oem_id[6];
   uint8_t rev;
   uint32_t rsdt_addr;
+} rsdp_t;
+
+typedef struct __attribute__((packed)) {
+  rsdp_t rsdp;
   uint32_t len;
   uint64_t xsdt_addr;
   uint8_t extended_checksum;
@@ -58,6 +62,11 @@ typedef struct __attribute__((packed)) {
   uint32_t creator_id;
   uint32_t creator_rev;
 } acpi_sdt_header_t;
+
+typedef struct __attribute__((packed)) {
+  acpi_sdt_header_t header;
+  uint32_t sdt_ptr[];
+} rsdt_t;
 
 typedef struct __attribute__((packed)) {
   acpi_sdt_header_t header;
